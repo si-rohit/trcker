@@ -1,12 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function Home() {
   const [trips, setTrips] = useState([]);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all"); // all | entered | exited
+  const [filter, setFilter] = useState("all");
   const router = useRouter();
 
   useEffect(() => {
@@ -16,164 +16,172 @@ export default function Home() {
   }, []);
 
   const fetchTrips = async () => {
-    const res = await fetch("/api/createTrip", { method: "GET" });
-    const data = await res.json();
-    setTrips(data);
+    try {
+      const res = await fetch("/api/createTrip", { method: "GET" });
+      const data = await res.json();
+      setTrips(data);
+    } catch (error) {
+      console.error("Failed to fetch trips:", error);
+    }
   };
 
   const handleDelete = async (id) => {
     if (!confirm("Are you sure?")) return;
-    const res = await fetch(`/api/getAndDeleteTrip`, {
-      method: "DELETE",
-      body: id,
-    });
-    if (res.ok) {
-      alert("Trip Deleted ❌");
-      fetchTrips();
+    try {
+      const res = await fetch(`/api/getAndDeleteTrip`, {
+        method: "DELETE",
+        body: id,
+      });
+      if (res.ok) {
+        alert("Trip Deleted ❌");
+        fetchTrips();
+      }
+    } catch (error) {
+      console.error("Failed to delete trip:", error);
     }
   };
 
-  // ✅ Filter + Search Logic
-  const filteredTrips = trips.filter((trip) => {
-    const matchesSearch =
-      trip.truckNumber.toLowerCase().includes(search.toLowerCase()) ||
-      trip.companyName.toLowerCase().includes(search.toLowerCase()) ||
-      trip.tripNumber.toLowerCase().includes(search.toLowerCase());
+  const filteredTrips = useMemo(() => {
+    return trips.filter((trip) => {
+      const matchesSearch =
+        trip.truckNumber.toLowerCase().includes(search.toLowerCase()) ||
+        trip.companyName.toLowerCase().includes(search.toLowerCase()) ||
+        trip.tripNumber.toLowerCase().includes(search.toLowerCase());
 
-    const matchesFilter =
-      filter === "all"
-        ? true
-        : filter === "entered"
-        ? !trip.ExitTime
-        : filter === "exited"
-        ? trip.ExitTime
-        : true;
+      const matchesFilter =
+        filter === "all"
+          ? true
+          : filter === "entered"
+            ? !trip.ExitTime
+            : filter === "exited"
+              ? trip.ExitTime
+              : true;
 
-    return matchesSearch && matchesFilter;
-  });
+      return matchesSearch && matchesFilter;
+    });
+  }, [trips, search, filter]);
 
   return (
-    <>
-      <div className="p-6 max-[426px]:p-2 text-black">
-        <div className="flex gap-10 justify-between mb-6 px-6 max-[426px]:mb-4 max-[426px]:mt-2">
-          <h1 className="text-3xl font-bold max-[426px]:text-2xl ">Admin Dashboard</h1>
-
+    <div className="p-8 max-w-8xl mx-auto text-gray-100 font-sans bg-gray-900 min-h-screen">
+      {/* Top Header Section */}
+      <div className="flex flex-col sm:flex-row items-center justify-between mb-8 pb-4 border-b border-gray-700">
+        <h1 className="text-4xl font-extralight mb-4 sm:mb-0">
+          Admin <span className="font-bold text-orange-500">Dashboard</span>
+        </h1>
+        <div className="flex items-center space-x-4">
           <Link
-            href={"/create"}
-            className=" bg-black text-white font-bold py-2 px-4 rounded-sm block"
+            href="/create"
+            className="bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105"
           >
-            Create
+            Create Trip
           </Link>
-
           <button
             onClick={() => {
               localStorage.removeItem("token");
               router.push("/login");
             }}
-            className=" bg-black text-white font-bold py-2 px-4 rounded-sm"
+            className="bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 transform hover:scale-105"
           >
             Logout
           </button>
-          
         </div>
+      </div>
 
-        <div className="shadow p-6 rounded bg-gray-100 max-[426px]:p-2">
-          <div className="mb-4 flex justify-between items-center gap-4">
-            <h2 className="text-xl font-semibold">Trips</h2>
-            <div className="flex gap-3">
+      {/* Control Panel Section */}
+      <div className="shadow-2xl p-6 rounded-2xl bg-gray-800 border border-gray-700">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h2 className="text-2xl font-semibold text-gray-300">Trips Overview</h2>
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="relative w-full sm:w-auto">
               <input
-                className="bg-white border border-gray-600 rounded-sm py-1 px-2 max-[426px]:hidden"
-                placeholder="Search truck/driver"
+                className="bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 pl-12 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 w-full"
+                placeholder="Search truck/trip no."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-
-              <select
-                className="border border-gray-600 rounded-sm py-1 px-2"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-              >
-                <option value="all">All</option>
-                <option value="entered">Pending Exit</option>
-                <option value="exited">Exited</option>
-              </select>
+              <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path></svg>
             </div>
+            <select
+              className="border border-gray-600 rounded-lg py-3 px-4 bg-gray-700 text-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 w-full sm:w-auto"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            >
+              <option value="all">All Trips</option>
+              <option value="entered">Pending Exit</option>
+              <option value="exited">Exited</option>
+            </select>
           </div>
-          <input
-            className="bg-white border border-gray-600 rounded-sm py-1 px-2 text-lg hidden max-[426px]:flex mb-4 mx-auto w-[80%]"
-            placeholder="Search truck/driver"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full border bg-white rounded-b-sm">
-              <thead>
-                <tr className="bg-gray-200 text-left">
-                   <th className="p-2 border">ID</th>
-                   <th className="p-2 border">Trip No.</th>
-                  <th className="p-2 border">Truck No.</th>
-                  <th className="p-2 border">Company</th>
-                  <th className="p-2 border">Enter Time</th>
-                  {/* <th className="p-2 border">Loaded Image</th> */}
-                  <th className="p-2 border">Exit Time</th>
-                  <th className="p-2 border">Status</th>
-                  <th className="p-2 border">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {filteredTrips.map((trip) => (
-                  <tr key={trip._id}>
-                    <td className="p-2 border">{trip._id}</td>
-                    <td className="p-2 border">{trip.tripNumber}</td>
-                    <td className="p-2 border">{trip.truckNumber}</td>
-                    <td className="p-2 border">{trip.companyName}</td>
-                    <td className="p-2 border">
+        {/* Trips Table */}
+        <div className="overflow-x-auto rounded-lg shadow-md">
+          <table className="min-w-full bg-gray-700 text-gray-200 rounded-lg">
+            <thead>
+              <tr className="bg-gray-600 text-left text-sm font-semibold uppercase tracking-wider">
+                <th className="p-4 border-b border-gray-500 hidden sm:table-cell">ID</th>
+                <th className="p-4 border-b border-gray-500">Trip No.</th>
+                <th className="p-4 border-b border-gray-500">Truck No.</th>
+                <th className="p-4 border-b border-gray-500 hidden sm:table-cell">Company</th>
+                <th className="p-4 border-b border-gray-500 hidden md:table-cell">Enter Time</th>
+                <th className="p-4 border-b border-gray-500 hidden md:table-cell">Exit Time</th>
+                <th className="p-4 border-b border-gray-500">Status</th>
+                <th className="p-4 border-b border-gray-500 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTrips.length > 0 ? (
+                filteredTrips.map((trip) => (
+                  <tr key={trip._id} className="border-b border-gray-600 hover:bg-gray-600 transition-colors duration-200">
+                    <td className="p-4 hidden sm:table-cell">{trip._id}</td>
+                    <td className="p-4">{trip.tripNumber}</td>
+                    <td className="p-4">{trip.truckNumber}</td>
+                    <td className="p-4 hidden sm:table-cell">{trip.companyName}</td>
+                    <td className="p-4 hidden md:table-cell">
                       {new Date(trip.EnterTime).toLocaleString()}
                     </td>
-                    <td className="p-2 border">
-                      {trip.ExitTime
-                        ? new Date(trip.ExitTime).toLocaleString()
-                        : "—"}
+                    <td className="p-4 hidden md:table-cell">
+                      {trip.ExitTime ? new Date(trip.ExitTime).toLocaleString() : "—"}
                     </td>
-                    <td className="p-2 border">
-                      {trip.ExitTime ? "Completed" : "Active"}
+                    <td className="p-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${trip.ExitTime ? 'bg-green-600' : 'bg-yellow-500 text-black'}`}>
+                        {trip.ExitTime ? "Completed" : "Active"}
+                      </span>
                     </td>
-                    
-                    <td className="p-2 border-t flex flex-wrap gap-2">
-                     
-                      {/* <button
-                        onClick={() => handleDelete(trip._id)}
-                        className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 cursor-pointer"
-                      >
-                        Delete
-                      </button> */}
-
-                      <Link
-                        href={`/view/${trip._id}`}
-                        className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 mr-5 cursor-pointer">
-                        View
-                      </Link>
-                       
-                      <Link
-                        href={`/update/${trip._id}`}
-                        className={`bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 mr-5 cursor-pointer ${trip.ExitTime ? "hidden" : ""}`}
-                      >
-                        Modify
-                      </Link>
+                    <td className="p-4 text-center">
+                      <div className="flex items-center justify-center flex-wrap gap-2">
+                        <Link
+                          href={`/view/${trip._id}`}
+                          className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition duration-300"
+                        >
+                          View
+                        </Link>
+                        <Link
+                          href={`/update/${trip._id}`}
+                          className={`bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-green-700 transition duration-300 ${trip.ExitTime ? "hidden" : ""}`}
+                        >
+                          Modify
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(trip._id)}
+                          className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-red-700 transition duration-300"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {filteredTrips.length === 0 && (
-            <div className="text-center py-2 w-full">No trip found</div>
-          )}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="p-4 text-center text-gray-400">
+                    No trips found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
-    </>
+    </div>
   );
 }
