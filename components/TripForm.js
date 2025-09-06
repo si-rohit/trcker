@@ -58,18 +58,21 @@ export default function TripForm() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
-      {/* Header */}
-      <div className="bg-gray-800 text-white py-4 px-6 flex items-center justify-between shadow-md">
+      {/* Header with sticky position */}
+      <div className="sticky top-0 z-10 bg-gray-800 text-white py-4 px-4 flex items-center gap-4 shadow-md">
         <span className="cursor-pointer text-orange-500" onClick={() => router.back()}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-move-left-icon lucide-move-left"><path d="M6 8L2 12L6 16" /><path d="M2 12H22" /></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="24" viewBox="0 0 26 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M31 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
         </span>
         <p className="text-2xl font-light">Create <span className="font-bold text-orange-500">Trip</span></p>
         <div></div> {/* Spacer to balance header */}
       </div>
 
       {/* Form Section */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6 bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-700">
+      <div className="flex-1 flex justify-center p-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6 rounded-2xl shadow-2xl w-full max-w-lg">
           {/* Trip Number Input */}
           <input
             type="text"
