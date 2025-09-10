@@ -76,19 +76,19 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
-    <div className="sticky top-0 z-10 bg-gray-800 text-white py-4 px-4 flex items-center gap-4 shadow-md">
+      <div className="sticky top-0 z-10 bg-gray-800 text-white py-4 px-4 flex items-center gap-4 shadow-md">
         <span className="cursor-pointer text-orange-500" onClick={() => window.history.back()}>
           <svg xmlns="http://www.w3.org/2000/svg" width="26" height="24" viewBox="0 0 26 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M31 12H5" />
             <path d="M12 19l-7-7 7-7" />
           </svg>
         </span>
-        <p className="text-2xl font-light">Update <span className="font-bold text-orange-500">Trip</span></p>
+        <p className="text-2xl font-light">Update </p>
         <div></div>
       </div>
 
       {/* Main Content */}
-               <div className="flex-1 flex justify-center p-4">
+      <div className="flex-1 flex justify-center p-4">
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 rounded-2xl shadow-2xl w-full max-w-lg">
           <input

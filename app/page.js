@@ -6,7 +6,8 @@ import Link from "next/link";
 export default function Home() {
   const [trips, setTrips] = useState([]);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("entered");
+  const [monthsFilter, setMonthsFilter] = useState('thisMonth');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function Home() {
     try {
       const res = await fetch("/api/createTrip", { method: "GET" });
       const data = await res.json();
+      // console.log(data);
       setTrips(data);
     } catch (error) {
       console.error("Failed to fetch trips:", error);
@@ -43,13 +45,30 @@ export default function Home() {
               ? trip.ExitTime
               : true;
 
-      return matchesSearch && matchesFilter;
+      // console.log(trip.EnterTime.Date)
+      const enterDate = new Date(trip.EnterTime);
+
+      const matchesMonthFilter = 
+        monthsFilter === 'thisMonth'
+          ? enterDate.getMonth() === new Date().getMonth()
+          : monthsFilter === 'lastMonth'
+            ? enterDate.getMonth() === new Date().getMonth() - 1
+            : monthsFilter === 'last3Months'
+              ? enterDate.getMonth() >= new Date().getMonth() - 3
+              : true;
+
+
+      return matchesSearch && matchesFilter && matchesMonthFilter;
     });
-  }, [trips, search, filter]);
+  }, [trips, search, filter, monthsFilter]);
 
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
-    setIsFilterOpen(false); // Close off-canvas after selection
+    // setIsFilterOpen(false); // Close off-canvas after selection
+  };
+  const handleMonthsFilterChange = (newFilter) => {
+    setMonthsFilter(newFilter);
+    // setIsFilterOpen(false); // Close off-canvas after selection
   };
 
   const handleLogout = () => {
@@ -95,14 +114,14 @@ export default function Home() {
                 >
                   <div className="flex gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg"
-                      class="w-5 h-5"
+                      className="w-5 h-5"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
-                      stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                      strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
-                    Create Trip
+                    Create
                   </div>
                 </Link>
               </div>
@@ -118,8 +137,19 @@ export default function Home() {
                   <option value="exited">Exited</option>
                 </select>
               </div>
-              <div className="">
 
+              <div className="hidden sm:block w-full sm:w-auto">
+                <select
+                  className="border border-gray-600 rounded-lg py-3 px-4 bg-gray-700 text-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 w-full sm:w-auto"
+                  value={monthsFilter}
+                  onChange={(e) => setMonthsFilter(e.target.value)}
+                >
+                  <option value="thisMonth">This Month</option>
+                  <option value="lastMonth">Last Month</option>
+                  <option value="last3Months">Last 3 Months</option>
+                </select>
+              </div>
+              <div className="">
                 {/* Profile Icon Button */}
                 <button
                   onClick={() => {
@@ -170,7 +200,7 @@ export default function Home() {
                 <div className="bg-gray-700 p-4 rounded-lg shadow-md border mb-4 border-gray-600 cursor-pointer hover:bg-gray-600 transition-colors duration-200">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-semibold text-gray-400">
-                      Trip No:
+                      Trip No.
                     </span>
                     <span className="text-base font-medium">
                       {trip.tripNumber}
@@ -178,7 +208,7 @@ export default function Home() {
                   </div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-semibold text-gray-400">
-                      Truck No:
+                      Truck No.
                     </span>
                     <span className="text-base font-medium">
                       {trip.truckNumber}
@@ -186,7 +216,7 @@ export default function Home() {
                   </div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-semibold text-gray-400">
-                      Company:
+                      Company
                     </span>
                     <span className="text-base font-medium">
                       {trip.companyName}
@@ -194,7 +224,7 @@ export default function Home() {
                   </div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-semibold text-gray-400">
-                      Status:
+                      Status
                     </span>
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${trip.ExitTime ? "bg-green-600" : "bg-yellow-500 text-black"
@@ -203,26 +233,33 @@ export default function Home() {
                       {trip.ExitTime ? "Completed" : "Active"}
                     </span>
                   </div>
-                  <div className="flex justify-end gap-2 mt-4">
-                    {trip.ExitTime ? (
-                      <Link href={`/view/${trip._id}`}>
-                        <button className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition duration-300">
-                          View
-                        </button>
-                      </Link>
-                    ) : (
-                      <Link href={`/update/${trip._id}`}>
-                        <button className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-green-700 transition duration-300">
-                          Modify
-                        </button>
-                      </Link>
-                    )}
-                  </div>
                 </div>
               </Link>
             ))
           ) : (
-            <div className="p-4 text-center text-gray-400">No trips found</div>
+            [...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="bg-gray-700 p-4 rounded-lg shadow-md border mb-4 border-gray-600 animate-pulse"
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <span className="h-3 w-16 bg-gray-600 rounded"></span>
+                  <span className="h-4 w-20 bg-gray-500 rounded"></span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="h-3 w-20 bg-gray-600 rounded"></span>
+                  <span className="h-4 w-24 bg-gray-500 rounded"></span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="h-3 w-20 bg-gray-600 rounded"></span>
+                  <span className="h-4 w-28 bg-gray-500 rounded"></span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="h-3 w-16 bg-gray-600 rounded"></span>
+                  <span className="h-5 w-20 bg-gray-500 rounded-full"></span>
+                </div>
+              </div>
+            ))
           )}
         </div>
 
@@ -286,23 +323,46 @@ export default function Home() {
                         >
                           View
                         </Link>
-                        <Link
+                        {/* <Link
                           href={`/update/${trip._id}`}
                           className={`bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-green-700 transition duration-300 ${trip.ExitTime ? "hidden" : ""
                             }`}
                         >
                           Modify
-                        </Link>
+                        </Link> */}
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
-                <tr>
-                  <td colSpan="8" className="p-4 text-center text-gray-400">
-                    No trips found
-                  </td>
-                </tr>
+                [...Array(5)].map((_, i) => (
+                  <tr key={i} className="border-b border-gray-600 animate-pulse">
+                    <td className="p-4 hidden sm:table-cell">
+                      <div className="h-4 w-20 bg-gray-600 rounded"></div>
+                    </td>
+                    <td className="p-4">
+                      <div className="h-4 w-16 bg-gray-600 rounded"></div>
+                    </td>
+                    <td className="p-4">
+                      <div className="h-4 w-20 bg-gray-600 rounded"></div>
+                    </td>
+                    <td className="p-4 hidden sm:table-cell">
+                      <div className="h-4 w-28 bg-gray-600 rounded"></div>
+                    </td>
+                    <td className="p-4 hidden md:table-cell">
+                      <div className="h-4 w-32 bg-gray-600 rounded"></div>
+                    </td>
+                    <td className="p-4 hidden md:table-cell">
+                      <div className="h-4 w-32 bg-gray-600 rounded"></div>
+                    </td>
+                    <td className="p-4">
+                      <div className="h-5 w-16 bg-gray-500 rounded-full"></div>
+                    </td>
+                    <td className="p-4 text-center">
+                      <div className="h-8 w-16 bg-gray-500 rounded-lg mx-auto"></div>
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
@@ -316,12 +376,12 @@ export default function Home() {
         >
           <div className="flex gap-2">
             <svg xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5"
+              className="w-5 h-5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             Create Trip
           </div>
@@ -351,7 +411,7 @@ export default function Home() {
       >
         <div className="bg-gray-800 rounded-t-2xl p-6 shadow-2xl border-t border-gray-700">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold">Filter Trips</h3>
+            <h3 className="text-xl font-semibold">Filter</h3>
             <button
               onClick={() => setIsFilterOpen(false)}
               className="text-gray-400 hover:text-white"
@@ -373,6 +433,23 @@ export default function Home() {
             </button>
           </div>
           <div className="flex flex-col gap-2">
+            
+            <button
+              onClick={() => handleFilterChange("entered")}
+              className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${filter === "entered" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+            >
+              Active
+            </button>
+
+            <button
+              onClick={() => handleFilterChange("exited")}
+              className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${filter === "exited" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+            >
+              Completed
+            </button>
+
             <button
               onClick={() => handleFilterChange("all")}
               className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${filter === "all" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -380,19 +457,29 @@ export default function Home() {
             >
               All Trips
             </button>
+
+            <hr className="border-gray-700"></hr>
+
             <button
-              onClick={() => handleFilterChange("entered")}
-              className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${filter === "entered" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              onClick={() => handleMonthsFilterChange("thisMonth")}
+              className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "thisMonth" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
             >
-              Pending Exit
+              This Month
             </button>
             <button
-              onClick={() => handleFilterChange("exited")}
-              className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${filter === "exited" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              onClick={() => handleMonthsFilterChange("lastMonth")}
+              className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "lastMonth" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
             >
-              Exited
+              Last Month
+            </button>
+            <button
+              onClick={() => handleMonthsFilterChange("last3Months")}
+              className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "last3Months" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+            >
+              Last 3 Months
             </button>
           </div>
         </div>

@@ -66,7 +66,7 @@ export default function TripForm() {
             <path d="M12 19l-7-7 7-7" />
           </svg>
         </span>
-        <p className="text-2xl font-light">Create <span className="font-bold text-orange-500">Trip</span></p>
+        <p className="text-2xl font-light">Create </p>
         <div></div> {/* Spacer to balance header */}
       </div>
 
@@ -106,7 +106,7 @@ export default function TripForm() {
 
           {/* Image Upload Section */}
           <div className="flex flex-col gap-4 text-center">
-            <button className="bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md hover:bg-blue-700 transition duration-300" onClick={(e) => { e.preventDefault(); setOpenTakePhoto(true); }}>Take Photo</button>
+            <button className="bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md hover:bg-blue-700 transition duration-300 flex items-center justify-center gap-2" onClick={(e) => { e.preventDefault(); setOpenTakePhoto(true); }}><span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-camera-icon lucide-camera"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg></span> Take Photo</button>
             <p className="text-gray-400">OR</p>
             <div className="flex flex-col items-center justify-center p-8 rounded-lg border-2 border-dashed border-gray-600 cursor-pointer hover:border-orange-500 transition duration-300" onClick={() => document.getElementById('loadedImage').click()}>
               <span className="bg-gray-700 p-3 rounded-full mb-3">
@@ -130,8 +130,9 @@ export default function TripForm() {
           )}
 
           {/* Submit Button */}
-          <button type="submit" className="bg-orange-600 text-white px-4 py-3 rounded-lg w-full font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105">
-            Create Trip
+          <button type="submit" className="bg-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg w-full font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105">
+            <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+            Create 
           </button>
         </form>
         {openTakePhoto && <TakePhoto setOpenTakePhoto={setOpenTakePhoto} form={form} setForm={setForm} uploadType={"LoadedImage"} />}
