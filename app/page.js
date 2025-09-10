@@ -81,8 +81,8 @@ export default function Home() {
       {/* Sticky Header Section */}
       <div className="sticky top-0 z-50 bg-gray-900 border-b border-gray-700">
         <div className="p-3 md:px-8 max-w-8xl mx-auto flex items-center justify-between">
-          <h1 className="text-1xl md:text-3xl font-extralight">
-            <span className="font-bold text-orange-500">Logo</span>
+          <h1 className="text-1xl md:text-3xl font-extralight border-2 border-orange-500 rounded-full p-2 px-4 flex items-center justify-center">
+            <span className="font-bold text-orange-500">T</span>
           </h1>
           <div>
             <div className="flex flex-1 flex-row justify-between items-center gap-4">
@@ -133,8 +133,8 @@ export default function Home() {
                   onChange={(e) => setFilter(e.target.value)}
                 >
                   <option value="all">All Trips</option>
-                  <option value="entered">Pending Exit</option>
-                  <option value="exited">Exited</option>
+                  <option value="entered">Active</option>
+                  <option value="exited">Completed</option>
                 </select>
               </div>
 
