@@ -40,33 +40,57 @@ const uploadToCloudinary = (fileBuffer) => {
   });
 };
 
+// Define all file fields
+const fileFields = [
+  { name: "FrontImage", maxCount: 1 },
+  { name: "TopImage", maxCount: 1 },
+  { name: "LoadedImage1", maxCount: 1 },
+  { name: "LoadedImage2", maxCount: 1 },
+  { name: "RoyaltyImage", maxCount: 1 },
+  { name: "WeightReciept", maxCount: 1 },
+];
+
 export default async function handler(req, res) {
   await dbConnect();
 
   if (req.method === "GET") {
+    const { uid } = req.query;
+    console.log(uid);
     const trips = await Trip.find();
     return res.status(200).json(trips);
   }
 
   if (req.method === "POST") {
     try {
-      await runMiddleware(req, res, upload.array("LoadedImage"));
+      await runMiddleware(req, res, upload.fields(fileFields));
 
-      const { truckNumber, companyName, tripNumber } = req.body;
-      
-      let uploadedUrls = [];
-      if (req.files && req.files.length > 0) {
-        
-        uploadedUrls = await Promise.all(
-          req.files.map((file) => uploadToCloudinary(file.buffer))
-        );
+      const { truckNumber, companyName, tripNumber, weight, uid } = req.body;
+
+      // Upload files if they exist
+      console.log('uid', uid);
+      const uploadedFiles = {};
+      for (const field of fileFields) {
+        const file = req.files?.[field.name]?.[0];
+        if (file) {
+          uploadedFiles[field.name] = await uploadToCloudinary(file.buffer);
+        } else {
+          uploadedFiles[field.name] = null; // if missing
+        }
       }
+
       const trip = await Trip.create({
         truckNumber,
         companyName,
         tripNumber,
-        LoadedImage: uploadedUrls,
+        weight,
         EnterTime: new Date(),
+        Suppervisor1: uid,
+        FrontImage: uploadedFiles.FrontImage,
+        TopImage: uploadedFiles.TopImage,
+        LoadedImage1: uploadedFiles.LoadedImage1,
+        LoadedImage2: uploadedFiles.LoadedImage2,
+        RoyaltyImage: uploadedFiles.RoyaltyImage,
+        WeightReciept: uploadedFiles.WeightReciept,
       });
 
       return res.json({ success: true, trip });

@@ -2,6 +2,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { set } from "mongoose";
 
 export default function Home() {
   const [trips, setTrips] = useState([]);
@@ -11,26 +12,39 @@ export default function Home() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  let uid;
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("user");
     if (!token) router.push("/login");
+    uid = token;
     fetchTrips();
   }, []);
+  
 
   const fetchTrips = async () => {
     try {
-      const res = await fetch("/api/createTrip", { method: "GET" });
+      setLoading(true);
+      // console.log(uid);
+      const res = await fetch(`/api/getAllUserTrip`, { 
+        method: "POST", 
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ id: uid }),  
+      });
       const data = await res.json();
       // console.log(data);
-      setTrips(data);
+      setTrips(data.trips);
+      setLoading(false);
     } catch (error) {
       console.error("Failed to fetch trips:", error);
+      setLoading(false);
     }
   };
 
   const filteredTrips = useMemo(() => {
-    return trips.filter((trip) => {
+    return trips.length > 0 && trips?.filter((trip) => {
       const matchesSearch =
         trip.truckNumber.toLowerCase().includes(search.toLowerCase()) ||
         trip.companyName.toLowerCase().includes(search.toLowerCase()) ||
@@ -144,9 +158,13 @@ export default function Home() {
                   value={monthsFilter}
                   onChange={(e) => setMonthsFilter(e.target.value)}
                 >
+                  <option value="today">Today</option>                
+                  <option value="thisWeek">This Week</option>
+                  <option value="lastWeek">Last Week</option>
                   <option value="thisMonth">This Month</option>
                   <option value="lastMonth">Last Month</option>
                   <option value="last3Months">Last 3 Months</option>
+                  <option value="custom">Custom Date</option>
                 </select>
               </div>
               <div className="">
@@ -194,7 +212,32 @@ export default function Home() {
       <div className="p-4 md:p-8 max-w-8xl mx-auto">
         {/* Trips Table - Mobile View: Cards */}
         <div className="sm:hidden space-y-4 mb-20">
-          {filteredTrips.length > 0 ? (
+          {loading ? (
+            [...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="bg-gray-700 p-4 rounded-lg shadow-md border mb-4 border-gray-600 animate-pulse"
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <span className="h-3 w-16 bg-gray-600 rounded"></span>
+                  <span className="h-4 w-20 bg-gray-500 rounded"></span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="h-3 w-20 bg-gray-600 rounded"></span>
+                  <span className="h-4 w-24 bg-gray-500 rounded"></span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="h-3 w-20 bg-gray-600 rounded"></span>
+                  <span className="h-4 w-28 bg-gray-500 rounded"></span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="h-3 w-16 bg-gray-600 rounded"></span>
+                  <span className="h-5 w-20 bg-gray-500 rounded-full"></span>
+                </div>
+              </div>
+            ))
+          ):
+          (filteredTrips.length > 0 ? (
             filteredTrips.map((trip) => (
               <Link key={trip._id} href={`/view/${trip._id}`}>
                 <div className="bg-gray-700 p-4 rounded-lg shadow-md border mb-4 border-gray-600 cursor-pointer hover:bg-gray-600 transition-colors duration-200">
@@ -237,30 +280,8 @@ export default function Home() {
               </Link>
             ))
           ) : (
-            [...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className="bg-gray-700 p-4 rounded-lg shadow-md border mb-4 border-gray-600 animate-pulse"
-              >
-                <div className="flex justify-between items-center mb-2">
-                  <span className="h-3 w-16 bg-gray-600 rounded"></span>
-                  <span className="h-4 w-20 bg-gray-500 rounded"></span>
-                </div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="h-3 w-20 bg-gray-600 rounded"></span>
-                  <span className="h-4 w-24 bg-gray-500 rounded"></span>
-                </div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="h-3 w-20 bg-gray-600 rounded"></span>
-                  <span className="h-4 w-28 bg-gray-500 rounded"></span>
-                </div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="h-3 w-16 bg-gray-600 rounded"></span>
-                  <span className="h-5 w-20 bg-gray-500 rounded-full"></span>
-                </div>
-              </div>
-            ))
-          )}
+            <div>No trips found.</div>
+          ))}
         </div>
 
         {/* Trips Table - Desktop View */}
@@ -268,14 +289,15 @@ export default function Home() {
           <table className="min-w-full bg-gray-700 text-gray-200 rounded-lg">
             <thead>
               <tr className="bg-gray-600 text-left text-sm font-semibold uppercase tracking-wider">
-                <th className="p-4 border-b border-gray-500 hidden sm:table-cell">
-                  ID
-                </th>
+                
                 <th className="p-4 border-b border-gray-500">Trip No.</th>
                 <th className="p-4 border-b border-gray-500">Truck No.</th>
+                <th className="p-4 border-b border-gray-500">Weight</th>
                 <th className="p-4 border-b border-gray-500 hidden sm:table-cell">
                   Company
                 </th>
+                <th className="p-4 border-b border-gray-500">Supervisor 1</th>
+                <th className="p-4 border-b border-gray-500">Supervisor 2</th>
                 <th className="p-4 border-b border-gray-500 hidden md:table-cell">
                   Enter Time
                 </th>
@@ -289,18 +311,51 @@ export default function Home() {
               </tr>
             </thead>
             <tbody>
-              {filteredTrips.length > 0 ? (
+              {loading ? (
+                [...Array(5)].map((_, i) => (
+                  <tr key={i} className="border-b border-gray-600 animate-pulse">
+                    <td className="p-4 hidden sm:table-cell">
+                      <div className="h-4 w-20 bg-gray-600 rounded"></div>
+                    </td>
+                    <td className="p-4">
+                      <div className="h-4 w-16 bg-gray-600 rounded"></div>
+                    </td>
+                    <td className="p-4">
+                      <div className="h-4 w-20 bg-gray-600 rounded"></div>
+                    </td>
+                    <td className="p-4 hidden sm:table-cell">
+                      <div className="h-4 w-28 bg-gray-600 rounded"></div>
+                    </td>
+                    <td className="p-4 hidden md:table-cell">
+                      <div className="h-4 w-32 bg-gray-600 rounded"></div>
+                    </td>
+                    <td className="p-4 hidden md:table-cell">
+                      <div className="h-4 w-32 bg-gray-600 rounded"></div>
+                    </td>
+                    <td className="p-4">
+                      <div className="h-5 w-16 bg-gray-500 rounded-full"></div>
+                    </td>
+                    <td className="p-4 text-center">
+                      <div className="h-8 w-16 bg-gray-500 rounded-lg mx-auto"></div>
+                    </td>
+                  </tr>
+                ))
+              ):
+              filteredTrips.length > 0 ? (
                 filteredTrips.map((trip) => (
                   <tr
                     key={trip._id}
                     className="border-b border-gray-600 transition-colors duration-200"
                   >
-                    <td className="p-4 hidden sm:table-cell">{trip._id}</td>
+                    {/* <td className="p-4 hidden sm:table-cell">{trip._id}</td> */}
                     <td className="p-4">{trip.tripNumber}</td>
                     <td className="p-4">{trip.truckNumber}</td>
+                    <td className="p-4">{trip.weight}kg</td>
                     <td className="p-4 hidden sm:table-cell">
                       {trip.companyName}
                     </td>
+                    <td className="p-4">{trip.Suppervisor1}</td>
+                    <td className="p-4">{trip.Suppervisor2 ? trip.Suppervisor2 : "—"}</td>
                     <td className="p-4 hidden md:table-cell">
                       {new Date(trip.EnterTime).toLocaleString()}
                     </td>
@@ -335,34 +390,7 @@ export default function Home() {
                   </tr>
                 ))
               ) : (
-                [...Array(5)].map((_, i) => (
-                  <tr key={i} className="border-b border-gray-600 animate-pulse">
-                    <td className="p-4 hidden sm:table-cell">
-                      <div className="h-4 w-20 bg-gray-600 rounded"></div>
-                    </td>
-                    <td className="p-4">
-                      <div className="h-4 w-16 bg-gray-600 rounded"></div>
-                    </td>
-                    <td className="p-4">
-                      <div className="h-4 w-20 bg-gray-600 rounded"></div>
-                    </td>
-                    <td className="p-4 hidden sm:table-cell">
-                      <div className="h-4 w-28 bg-gray-600 rounded"></div>
-                    </td>
-                    <td className="p-4 hidden md:table-cell">
-                      <div className="h-4 w-32 bg-gray-600 rounded"></div>
-                    </td>
-                    <td className="p-4 hidden md:table-cell">
-                      <div className="h-4 w-32 bg-gray-600 rounded"></div>
-                    </td>
-                    <td className="p-4">
-                      <div className="h-5 w-16 bg-gray-500 rounded-full"></div>
-                    </td>
-                    <td className="p-4 text-center">
-                      <div className="h-8 w-16 bg-gray-500 rounded-lg mx-auto"></div>
-                    </td>
-                  </tr>
-                ))
+                <div>No trips found</div>
               )}
             </tbody>
           </table>
@@ -459,6 +487,30 @@ export default function Home() {
             </button>
 
             <hr className="border-gray-700"></hr>
+
+            <button
+              onClick={() => handleMonthsFilterChange("today")}
+              className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "today" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+            >
+              Today
+            </button>
+
+            <button
+              onClick={() => handleMonthsFilterChange("thisWeek")}
+              className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "thisWeek" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+            >
+              This Week
+            </button>
+
+            <button
+              onClick={() => handleMonthsFilterChange("lastWeek")}
+              className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "lastWeek" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+            >
+             Last Week
+            </button>
 
             <button
               onClick={() => handleMonthsFilterChange("thisMonth")}

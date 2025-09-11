@@ -6,9 +6,11 @@ export default function Page() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     const res = await fetch("/api/auth/login", {
       method: "POST",
@@ -17,11 +19,14 @@ export default function Page() {
     });
 
     const data = await res.json();
+    // console.log(data);
     if (!data.error) {
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", data.admin._id);
       router.push("/");
+      setLoading(false);
     } else {
       alert("Invalid credentials ❌");
+      setLoading(false);
     }
   };
 
@@ -121,7 +126,7 @@ export default function Page() {
             type="submit"
             className="w-full bg-orange-600 py-4 rounded-lg text-white font-semibold text-lg hover:bg-orange-700 transition duration-300 shadow-lg"
           >
-            LOGIN
+            {loading ? "Logging in..." : "Log In"}
           </button>
 
           {/* Optional: Forgotten Password link */}

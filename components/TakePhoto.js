@@ -68,7 +68,7 @@ const TakePhoto = ({ setOpenTakePhoto, form, setForm ,uploadType }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-90 z-50">
+    <div className="relative rounded-lg flex flex-col items-center justify-center bg-black bg-opacity-90 z-50">
       <button
         className="absolute top-4 right-4 text-white text-2xl"
         onClick={() => setOpenTakePhoto(false)}

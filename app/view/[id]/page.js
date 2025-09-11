@@ -41,6 +41,8 @@ const Page = () => {
     )
   }
 
+  console.log(form)
+
   return (
     <div className='min-h-screen bg-gray-900 text-gray-100 font-sans flex flex-col'>
       {/* Mobile Header (Sticky) */}
@@ -50,7 +52,7 @@ const Page = () => {
             onClick={() => window.history.back()}
             className="text-gray-400 hover:text-orange-500 transition-colors"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="24" viewBox="0 0 26 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="24" viewBox="0 0 26 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M31 12H5" />
               <path d="M12 19l-7-7 7-7" />
             </svg>

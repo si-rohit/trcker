@@ -21,9 +21,9 @@ export default async function handler(req, res){
         return res.json({ error: "Invalid password" }, { status: 400 });
       }
 
-      const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+      // const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
-      return res.json({ message: "Login successful", token });
+      return res.json({ message: "Login successful", admin });
     } catch (error) {
       return res.json({ error: error.message }, { status: 500 });
     }
