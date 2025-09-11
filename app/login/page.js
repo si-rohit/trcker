@@ -52,7 +52,7 @@ export default function Page() {
             </svg>
           </div>
           <h1 className="text-xl font-extralight">
-            <span className="font-bold text-orange-500">Bailey</span> and Co.
+            <span className="font-bold text-orange-500">Truck </span> and Management.
           </h1>
         </div>
       </div>
@@ -77,7 +77,7 @@ export default function Page() {
             </svg>
           </div>
           <h1 className="text-4xl font-extralight text-center">
-            <span className="font-bold text-orange-500">Bailey</span> and Co.
+            <span className="font-bold text-orange-500">Truck</span> and managment.
           </h1>
           <p className="mt-2 text-gray-400 text-sm">Admin Dashboard</p>
         </div>
