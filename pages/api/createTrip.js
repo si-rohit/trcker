@@ -48,17 +48,19 @@ const fileFields = [
   { name: "LoadedImage2", maxCount: 1 },
   { name: "RoyaltyImage", maxCount: 1 },
   { name: "WeightReciept", maxCount: 1 },
+  { name: "UnloadedImage1", maxCount: 1 },
+  { name: "UnloadedImage2", maxCount: 1 },
 ];
 
 export default async function handler(req, res) {
   await dbConnect();
 
-  if (req.method === "GET") {
-    const { uid } = req.query;
-    console.log(uid);
-    const trips = await Trip.find();
-    return res.status(200).json(trips);
-  }
+  // if (req.method === "GET") {
+  //   const { uid } = req.query;
+  //   // console.log(uid);
+  //   const trips = await Trip.find();
+  //   return res.status(200).json(trips);
+  // }
 
   if (req.method === "POST") {
     try {
@@ -67,7 +69,7 @@ export default async function handler(req, res) {
       const { truckNumber, companyName, tripNumber, weight, uid } = req.body;
 
       // Upload files if they exist
-      console.log('uid', uid);
+      // console.log('uid', uid);
       const uploadedFiles = {};
       for (const field of fileFields) {
         const file = req.files?.[field.name]?.[0];
@@ -91,6 +93,8 @@ export default async function handler(req, res) {
         LoadedImage2: uploadedFiles.LoadedImage2,
         RoyaltyImage: uploadedFiles.RoyaltyImage,
         WeightReciept: uploadedFiles.WeightReciept,
+        UnloadedImage1: uploadedFiles.UnloadedImage1,
+        UnloadedImage2: uploadedFiles.UnloadedImage2,
       });
 
       return res.json({ success: true, trip });

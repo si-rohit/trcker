@@ -19,9 +19,12 @@ export default function Page() {
     });
 
     const data = await res.json();
-    // console.log(data);
+    console.log(data);
     if (!data.error) {
       localStorage.setItem("user", data.admin._id);
+      // localStorage.setItem("username", data.admin.username);
+      localStorage.setItem("role", data.admin.role);
+      // localStorage.setItem("token", data.token);
       router.push("/");
       setLoading(false);
     } else {

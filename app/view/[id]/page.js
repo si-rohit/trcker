@@ -2,12 +2,32 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import { formatDistanceToNow } from "date-fns";
 
 const Page = () => {
   const { id } = useParams()
   const [form, setForm] = useState(null)
   const [loading, setLoading] = useState(true)
   const [openImage, setOpenImage] = useState('')
+  const [isAdmin, setIsAdmin] = useState("");
+  const [allDataIsPresent, setAllDataIsPresent] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("user");
+    const role = localStorage.getItem("role");
+    if (!role) {
+      router.push("/login");
+      return;
+    }
+    setIsAdmin(role);
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+    // uid = token;
+    // fetchTrips();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const getdetails = async () => {
@@ -15,7 +35,25 @@ const Page = () => {
       try {
         const res = await fetch('/api/getAndDeleteTrip', { method: "POST", body: id })
         const data = await res.json()
-        setForm(data)
+        // console.log(data)
+        setForm(data.trip)
+        if (data.trip.tripNumber &&
+          data.trip.truckNumber &&
+          data.trip.companyName &&
+          data.trip.EnterTime &&
+          data.trip.weight &&
+          data.trip.Suppervisor1 &&
+          data.trip.FrontImage &&
+          data.trip.TopImage &&
+          data.trip.LoadedImage1 &&
+          data.trip.LoadedImage2 &&
+          data.trip.RoyaltyImage &&
+          data.trip.WeightReciept &&
+          data.trip.UnloadedImage1 &&
+          data.trip.UnloadedImage2 &&
+          data.trip.Suppervisor2) {
+          setAllDataIsPresent(true);
+        }
       } catch (error) {
         console.error("Failed to fetch trip details:", error)
       } finally {
@@ -41,6 +79,27 @@ const Page = () => {
     )
   }
 
+  const handelCompleteTrip = async () => {
+    if (!allDataIsPresent) {
+      alert("Cannot complete trip. Some trip details are missing.");
+      return;
+    }
+    try {
+      const res = await fetch('/api/completeTrip', { method: "POST", body: id })
+      const data = await res.json()
+      // console.log(data)
+      if (data.success) {
+        alert("Trip marked as complete.")
+        setForm({ ...form, status: 'complete' })
+      } else {
+        alert("Failed to mark trip as complete.")
+      }
+    } catch (error) {
+      console.error("Failed to complete trip:", error)
+      alert("An error occurred while completing the trip.")
+    }
+  }
+
   console.log(form)
 
   return (
@@ -59,8 +118,10 @@ const Page = () => {
           </button>
         <p className="text-2xl font-extralight">No. <span className='text-orange-500 font-extrabold'>{form.truckNumber}</span></p>
         </div>
+
+        <Link href={`/update/${id}`} className={`flex text-right bg-gray-700 py-2 px-4 rounded-md text-sm ${allDataIsPresent ?'hidden':''}`}>Update</Link>
         
-        <Link href={`/update/${id}`} className={`flex text-right bg-orange-500 py-2 px-4 rounded-md text-sm `}>Complete</Link>
+        <button onClick={()=>handelCompleteTrip()} className={`flex text-right bg-orange-500 py-2 px-4 rounded-md text-sm ${isAdmin === 'suppervisor2'?'hidden':''} ${form.ExitTime ?'hidden':''} ${allDataIsPresent ?'':'hidden'}`}>Complete</button>
       </div>
 
       {/* Main Content Wrapper with increased width */}
@@ -78,44 +139,68 @@ const Page = () => {
               <span className="font-semibold text-gray-400 block">Company Name</span> {form.companyName}
             </p>
             <p className="text-lg">
-              <span className="font-semibold text-gray-400 block">Enter Time</span> {new Date(form.EnterTime).toLocaleString()}
-            </p>            
+              <span className="font-semibold text-gray-400 block">Entry Time</span> {formatDistanceToNow(new Date(form.EnterTime), { addSuffix: true })}
+            </p>  
+            <p className="text-lg">
+              <span className="font-semibold text-gray-400 block">Weight</span> {form.weight} kg
+            </p>
+            <p className="text-lg">
+              <span className="font-semibold text-gray-400 block">Supervisor 1</span> {form.Suppervisor1.name}
+            </p>       
           </div>
 
           {/* Loaded Image Section */}
-          <div className="mb-8">
-            <p className="text-xl font-semibold text-gray-300 mb-4">Load Image</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {form.LoadedImage && form.LoadedImage.map((image, index) => (
-                <div key={index} className="relative w-full h-32 md:h-40 rounded-lg overflow-hidden shadow-lg">
-                  <img src={image} onClick={() => setOpenImage(image)} alt={`Loaded Image ${index + 1}`} className="w-full h-full object-cover" />
-                </div>
-              ))}
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-8'>
+            {/* <p className="text-xl font-semibold text-gray-300 mb-4">Load Image</p> */}
+            <div className={`${form.FrontImage === null ? 'hidden' : ''}`}>
+              <p>Front Image</p>
+              <img src={form.FrontImage } className='w-[200px] h-[200px]' alt='Front Image'></img>
             </div>
-            {(!form.LoadedImage || form.LoadedImage.length === 0) && (
-              <p className="text-gray-500 text-center py-4">No loaded images available.</p>
-            )}
+            <div className={`${form.TopImage === null ? 'hidden' : ''}`}>
+              <p>Top Image</p>
+              <img src={form.TopImage} className='w-[200px] h-[200px]' alt='Top Image'></img>
+            </div>
+            <div className={`${form.LoadedImage1 === null ? 'hidden' : ''}`}>
+              <p>Loaded Image 1</p>
+              <img src={form.LoadedImage1} className='w-[200px] h-[200px]' alt='Loaded Image 1'></img>
+            </div>
+            <div className={`${form.LoadedImage2 === null ? 'hidden' : ''}`}>
+              <p>Loaded Image 2</p>
+              <img src={form.LoadedImage2} className='w-[200px] h-[200px]' alt='Loaded Image 2'></img>
+            </div>
+            <div className={`${form.RoyaltyImage === null ? 'hidden' : ''}`}>
+              <p>Royalty Image</p>
+              <img src={form.RoyaltyImage} className='w-[200px] h-[200px]' alt='Royalty Image'></img>
+            </div>
+            <div className={`${form.WeightReciept === null ? 'hidden' : ''}`}>
+              <p>Weight Reciept</p>
+              <img src={form.WeightReciept} className='w-[200px] h-[200px]' alt='Weight Reciept'></img>
+            </div>
           </div>
 
           {form.ExitTime && (
-            <p className="text-lg mb-8">
-              <span className="font-semibold text-gray-400 block">Exit Time</span> {new Date(form.ExitTime).toLocaleString()}
-            </p>
+            <div className={`}`}>
+              <p className="text-lg mb-8">
+                <span className="font-semibold text-gray-400 block">Exit Time</span> {formatDistanceToNow(new Date(form.ExitTime), { addSuffix: true })}
+              </p>
+              
+            </div>
           )}
+            <span className="font-semibold text-gray-400 block">Supervisor 2</span> {form?.Suppervisor2?.name}
+                    
 
           {/* Unloaded Image Section */}
-          <div>
-            <p className="text-xl font-semibold text-gray-300 mb-4">Unload Image</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {form.UnloadedImage && form.UnloadedImage.map((image, index) => (
-                <div key={index} className="relative w-full h-32 md:h-40 rounded-lg overflow-hidden shadow-lg">
-                  <img src={image} alt={`Unloaded Image ${index + 1}`} className="w-full h-full object-cover" />
-                </div>
-              ))}
+          <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 `}>
+            {/* <p className="text-xl font-semibold text-gray-300 mb-4">Load Image</p> */}
+            <div className={`${form.UnloadedImage1 === null ? 'hidden' : ''}`}>
+              <p>Unloaded Image</p>
+              <img src={form.UnloadedImage1} className='w-[200px] h-[200px]' alt='Front Image'></img>
             </div>
-            {(!form.UnloadedImage || form.UnloadedImage.length === 0) && (
-              <p className="text-gray-500 text-center py-4">No unloaded images available.</p>
-            )}
+            <div className={`${form.UnloadedImage2 === null ? 'hidden' : ''}`}>
+              <p>Unloaded Image</p>
+              <img src={form.UnloadedImage2} className='w-[200px] h-[200px]' alt='Top Image'></img>
+            </div>
+            
           </div>
         </div>
       </div>

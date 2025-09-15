@@ -76,7 +76,7 @@ export default async function handler(req, res) {
       await runMiddleware(req, res, upload.single("profilePic"));
 
       const { username, password, email, name, role } = req.body;
-      console.log(req.body);
+      // console.log(req.body);
       if (!username || !password || !name || !role) {
         return res
           .status(400)

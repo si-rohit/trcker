@@ -4,7 +4,7 @@ const AdminSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true }, // hashed
   email: { type: String},
-  role: { type: String, default: "supervisor" },
+  role: { type: String, default: "suppervisor2" },
   name: { type: String},
   status: { type: String, default: "active" },
   profilePic: {

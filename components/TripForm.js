@@ -11,15 +11,16 @@ export default function TripForm() {
   const [form, setForm] = useState({
     truckNumber: "",
     companyName: "",
-    // LoadedImage: [],
     tripNumber: "",
     weight: "",    
-    FrontImage: "",
-    TopImage: "",
-    LoadedImage1: "",
-    LoadedImage2:'',
-    RoyaltyImage: "",
-    WeightReciept:'',
+    FrontImage: null,
+    TopImage: null,
+    LoadedImage1: null,
+    LoadedImage2: null,
+    RoyaltyImage: null,
+    WeightReciept: null,
+    UnloadedImage1: null,
+    UnloadedImage2: null,
   });
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -55,6 +56,9 @@ export default function TripForm() {
     formData.append('LoadedImage2', form.LoadedImage2);
     formData.append('RoyaltyImage', form.RoyaltyImage);
     formData.append('WeightReciept', form.WeightReciept);
+    formData.append('UnloadedImage1', form.UnloadedImage1);
+    formData.append('UnloadedImage2', form.UnloadedImage2);
+    // formData.append('date', new Date().toISOString());
 
     try {
       const resp = await fetch('/api/createTrip', {
@@ -69,12 +73,14 @@ export default function TripForm() {
           companyName: "",
           tripNumber: "",
           weight: "",
-          FrontImage: "",
-          TopImage: "",
-          LoadedImage1: "",
-          LoadedImage2: "",
-          RoyaltyImage: "",
-          WeightReciept: "",
+          FrontImage: null,
+          TopImage: null,
+          LoadedImage1: null,
+          LoadedImage2: null,
+          RoyaltyImage: null,
+          WeightReciept: null,
+          UnloadedImage1: null,
+          UnloadedImage2: null,
         });
         alert("Trip created successfully!");
         setLoading(false);
@@ -146,32 +152,6 @@ export default function TripForm() {
             required
           />
 
-          {/* Take Photo Button */}
-            {/* <button className="bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md hover:bg-blue-700 transition duration-300 flex items-center justify-center gap-2" onClick={(e) => { e.preventDefault(); setOpenTakePhoto(true); }}><span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-camera-icon lucide-camera"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg></span> Take Photo</button> */}
-
-          {/* Image Upload Section */}
-          <div className="flex flex-col gap-4 text-center">
-            {/* <p className="text-gray-400">OR</p> */}
-            <div className="flex flex-col items-center justify-center p-8 rounded-lg border-2 border-dashed border-gray-600 cursor-pointer hover:border-orange-500 transition duration-300" onClick={() => document.getElementById('loadedImage').click()}>
-              <span className="bg-gray-700 p-3 rounded-full mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-500"><path d="m18 9-6-6-6 6" /><path d="M12 3v14" /><path d="M5 21h14" /></svg>
-              </span>
-              <p className="text-gray-300 font-medium">Drag and Drop or <span className="text-orange-400 font-semibold">Select Image</span></p>
-              <input type="file" name={clickButton} onChange={(e)=> { setClickButton(e.target.name); setForm({ ...form, [e.target.name]: e.target.files[0] }) }} id="loadedImage" className="hidden" multiple />
-            </div>
-          </div>
-
-          {/* Image Preview */}
-          <div className="flex flex-wrap gap-4">
-            {form.FrontImage && <img src={URL.createObjectURL(form.FrontImage)} alt="Front Image" className="w-[100px] h-[100px] object-cover" />}
-            {form.TopImage && <img src={URL.createObjectURL(form.TopImage)} alt="Top Image" className="w-[100px] h-[100px] object-cover" />}
-            {form.LoadedImage1 && <img src={URL.createObjectURL(form.LoadedImage1)} alt="Side Image" className="w-[100px] h-[100px] object-cover" />}
-            {form.LoadedImage2 && <img src={URL.createObjectURL(form.LoadedImage2)} alt="Side Image" className="w-[100px] h-[100px] object-cover" />}
-            {form.RoyaltyImage && <img src={URL.createObjectURL(form.RoyaltyImage)} alt="Royalty Image" className="w-[100px] h-[100px] object-cover" />}
-            {form.WeightReciept && <img src={URL.createObjectURL(form.WeightReciept)} alt="Weight Reciept" className="w-[100px] h-[100px] object-cover" />}
-
-          </div>
-
           {/* Submit Button */}
           <button type="submit" className="bg-orange-600 text-white px-4 py-4 flex items-center gap-2 justify-center rounded-lg w-full font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105">
             {loading ? 'Loading...' : <span className="flex items-center gap-2">
@@ -181,27 +161,53 @@ export default function TripForm() {
           </button>
         </form>
 
-        <div className={`flex flex-wrap gap-4 w-[400px] `}>
-          <button onClick={(e) => { e.preventDefault(); setClickButton('FrontImage'); document.getElementById('loadedImage').click(); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.FrontImage?'hidden':''}`}>
-            Take Front picture of dumper on weighbridge
-          </button>
-          <button  onClick={(e) => { e.preventDefault(); setClickButton('TopImage'); document.getElementById('loadedImage').click(); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.TopImage?'hidden':''}`}>
-            Take Top picture of dumper on weighbridge
-          </button>
-          <button onClick={(e) => { e.preventDefault(); setClickButton('LoadedImage1'); document.getElementById('loadedImage').click(); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.LoadedImage1?'hidden':''}`}>
-            Take Loaded dumper Picture 1
-          </button>
-          <button onClick={(e) => { e.preventDefault(); setClickButton('LoadedImage2'); document.getElementById('loadedImage').click(); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.LoadedImage2?'hidden':''}`}>
-            Take Loaded dumper Picture 2
-          </button>
-          <button onClick={(e) => { e.preventDefault(); setClickButton('RoyaltyImage'); document.getElementById('loadedImage').click(); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.RoyaltyImage?'hidden':''}`}>
-            Take Royalty Picture
-          </button>
-          <button onClick={(e) => { e.preventDefault(); setClickButton('WeightReciept'); document.getElementById('loadedImage').click(); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.WeightReciept?'hidden':''}`}>
-            Take weighbridge Reciept
-          </button>
+        <div className={`grid grid-cols-2 gap-4 w-[400px] ${openTakePhoto?'hidden':''}`}>
+          {
+            form.FrontImage === null ?        
+            <button onClick={(e) => { e.preventDefault(); setClickButton('FrontImage'); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.FrontImage?'hidden':''}`}>
+              Front picture of dumper on weighbridge
+            </button>:<img src={form.FrontImage instanceof File ? URL.createObjectURL(form.FrontImage) : ""} alt="Front Image" className=" object-cover" />
+          }
+          { 
+            form.TopImage === null ?
+            <button  onClick={(e) => { e.preventDefault(); setClickButton('TopImage'); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.TopImage?'hidden':''}`}>
+              Top picture of dumper on weighbridge
+            </button>:<img src={form.FrontImage instanceof File ? URL.createObjectURL(form.TopImage): ''} alt="Top Image" className=" object-cover" />
+          }
+          {
+            form.LoadedImage1 === null? 
+            <button onClick={(e) => { e.preventDefault(); setClickButton('LoadedImage1'); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.LoadedImage1?'hidden':''}`}>
+              Loaded dumper Picture 1
+            </button>:<img src={URL.createObjectURL(form.LoadedImage1)} alt="Loaded Image 1" className=" object-cover" />
+          }
+          { form.LoadedImage2 === null?
+          
+          <button onClick={(e) => { e.preventDefault(); setClickButton('LoadedImage2'); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.LoadedImage2?'hidden':''}`}>
+            Loaded dumper Picture 2
+          </button>:<img src={URL.createObjectURL(form.LoadedImage2)} alt="Loaded Image 2" className=" object-cover" />
+          }
+          { form.RoyaltyImage === null?
+          <button onClick={(e) => { e.preventDefault(); setClickButton('RoyaltyImage'); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.RoyaltyImage?'hidden':''}`}>
+            Royalty Picture
+          </button>:<img src={URL.createObjectURL(form.RoyaltyImage)} alt="Royalty Image" className=" object-cover" />
+          }
+          { form.WeightReciept === null?
+          <button onClick={(e) => { e.preventDefault(); setClickButton('WeightReciept'); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.WeightReciept?'hidden':''}`}>
+            weighbridge Reciept
+          </button>:<img src={URL.createObjectURL(form.WeightReciept)} alt="Weight Reciept" className=" object-cover" />
+          }
+          { form.UnloadedImage1 === null?
+          <button onClick={(e) => { e.preventDefault(); setClickButton('UnloadedImage1'); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.UnloadedImage1?'hidden':''}`}>
+            Unloaded dumper Picture 1
+          </button>:<img src={URL.createObjectURL(form.UnloadedImage1)} alt="Unloaded Image 1" className=" object-cover" />
+          }
+          { form.UnloadedImage2 === null?
+          <button onClick={(e) => { e.preventDefault(); setClickButton('UnloadedImage2'); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.UnloadedImage2?'hidden':''}`}>
+            Unloaded dumper Picture 2
+          </button>:<img src={URL.createObjectURL(form.UnloadedImage2)} alt="Unloaded Image 2" className=" object-cover" />
+          }
         </div>
-        {/* {openTakePhoto && <TakePhoto setOpenTakePhoto={setOpenTakePhoto} form={form} setForm={setForm} clickButton={clickButton} uploadType={"LoadedImage"} />} */}
+        {openTakePhoto && <TakePhoto setOpenTakePhoto={setOpenTakePhoto} form={form} setForm={setForm} clickButton={clickButton} uploadType={"LoadedImage"} />}
       </div>
     </div>
   );

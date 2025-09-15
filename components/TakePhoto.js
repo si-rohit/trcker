@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
 
-const TakePhoto = ({ setOpenTakePhoto, form, setForm ,uploadType }) => {
+const TakePhoto = ({ setOpenTakePhoto, form, setForm ,clickButton }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -52,13 +52,13 @@ const TakePhoto = ({ setOpenTakePhoto, form, setForm ,uploadType }) => {
           const file = new File([blob], `photo_${Date.now()}.png`, {
             type: "image/png",
           });
-
-          // Add captured file to form
+          
           setForm((prev) => ({
             ...prev,
-            uploadType: [...(prev.uploadType || []), file],
+            [clickButton]: file,
           }));
 
+          // console.log("Updated form:", form);
           setOpenTakePhoto(false);
         }
       },

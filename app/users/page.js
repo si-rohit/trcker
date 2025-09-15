@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 
-export default function Home() {
-  const [trips, setTrips] = useState([]);
+export default function Page() {
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("entered");
   const [monthsFilter, setMonthsFilter] = useState("thisMonth");
@@ -19,17 +19,9 @@ export default function Home() {
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
   const [isCustomPopupOpen, setIsCustomPopupOpen] = useState(false);
-  const [customError, setCustomError] = useState("");
+//   const [customError, setCustomError] = useState("");
   const [prevMonthsFilter, setPrevMonthsFilter] = useState("thisMonth");
 
-  // today's date string for input max attribute (yyyy-mm-dd)
-  const todayString = useMemo(() => {
-    const t = new Date();
-    const y = t.getFullYear();
-    const m = String(t.getMonth() + 1).padStart(2, "0");
-    const d = String(t.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
-  }, []);
 
   let uid;
 
@@ -53,13 +45,14 @@ export default function Home() {
   const fetchTrips = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/getAllUserTrip`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: localStorage.getItem("user") || uid }),
+      const res = await fetch(`/api/getAllUsers`, {
+        method: "GET",
+        // headers: { "Content-Type": "application/json" },
+        // body: JSON.stringify({ id: localStorage.getItem("user") || uid }),
       });
       const data = await res.json();
-      setTrips(data.trips || []);
+      console.log("Fetched users:", data);
+      setUsers(data|| []);
       setLoading(false);
     } catch (error) {
       console.error("Failed to fetch trips:", error);
@@ -78,49 +71,6 @@ export default function Home() {
     }
   };
 
-  // months / range filter handler
-  const handleMonthsFilterChange = (newFilter) => {
-    // if user selects custom -> open popup and keep previous filter in case of cancel
-    if (newFilter === "custom") {
-      setPrevMonthsFilter(monthsFilter);
-      setMonthsFilter("custom");
-      setIsCustomPopupOpen(true);
-      return;
-    }
-    // otherwise apply immediately
-    setMonthsFilter(newFilter);
-  };
-
-  const handleCustomCancel = () => {
-    setIsCustomPopupOpen(false);
-    setCustomError("");
-    setCustomFrom("");
-    setCustomTo("");
-    setMonthsFilter(prevMonthsFilter);
-  };
-
-  const handleCustomOk = () => {
-    if (!customFrom || !customTo) {
-      setCustomError("Please select both From and To dates.");
-      return;
-    }
-    const from = new Date(customFrom + "T00:00:00");
-    const to = new Date(customTo + "T23:59:59");
-    const now = new Date();
-    if (to > now) {
-      setCustomError("To date cannot be in the future.");
-      return;
-    }
-    if (from > to) {
-      setCustomError("From date cannot be after To date.");
-      return;
-    }
-
-    // all good
-    setCustomError("");
-    setIsCustomPopupOpen(false);
-    setMonthsFilter("custom"); // keep custom
-  };
 
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
@@ -132,96 +82,33 @@ export default function Home() {
   };
 
   // robust filtering
-  const filteredTrips = useMemo(() => {
-    if (!trips) return [];
-    const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfLast3Months = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+  const filteredUsers = useMemo(() => {
+    if (!users) return [];
 
-    // compute start of this week (Monday) and last week
-    const startOfThisWeek = new Date(now);
-    startOfThisWeek.setHours(0, 0, 0, 0);
-    const day = startOfThisWeek.getDay(); // 0 = Sun ... 6 = Sat
-    const diffToMonday = (day + 6) % 7; // days since Monday
-    startOfThisWeek.setDate(startOfThisWeek.getDate() - diffToMonday);
-    const startOfLastWeek = new Date(startOfThisWeek);
-    startOfLastWeek.setDate(startOfThisWeek.getDate() - 7);
-
-    // if custom dates present, build from/to
-    const hasCustomRange = customFrom && customTo;
-    const customFromDate = hasCustomRange ? new Date(customFrom + "T00:00:00") : null;
-    const customToDate = hasCustomRange ? new Date(customTo + "T23:59:59") : null;
-
-    return trips.filter((trip) => {
-      // guard trip enter time
-      const enterRaw = trip?.EnterTime;
-      const enterDate = toDateObj(enterRaw);
-      // if no enterDate, skip month-based checks (let other filters decide)
-      // search matches
+    return users.filter((user) => {
       const matchesSearch =
-        (trip?.truckNumber || "")
+        (user?.name || "")
           .toString()
           .toLowerCase()
           .includes(search.toLowerCase()) ||
-        (trip?.companyName || "").toLowerCase().includes(search.toLowerCase()) ||
-        (trip?.tripNumber || "").toLowerCase().includes(search.toLowerCase()) ||
-        (trip?.Suppervisor1?.name || "").toLowerCase().includes(search.toLowerCase());
+        (user?.username || "").toLowerCase().includes(search.toLowerCase()) ||
+        (user?.email || "").toLowerCase().includes(search.toLowerCase())
+        // (user?.Suppervisor1?.name || "").toLowerCase().includes(search.toLowerCase());
 
       const matchesFilter =
         filter === "all"
           ? true
-          : filter === "entered"
-          ? !trip?.ExitTime
-          : filter === "exited"
-          ? !!trip?.ExitTime
+          : filter === "active"
+          ? user?.status === "active"
+          : filter === "unactive"
+          ? user?.status === "unactive"
           : true;
 
-      let matchesMonthFilter = true;
-      switch (monthsFilter) {
-        case "today":
-          matchesMonthFilter = enterDate ? enterDate.toDateString() === startOfToday.toDateString() : true;
-          break;
-        case "thisWeek":
-          matchesMonthFilter = enterDate ? enterDate >= startOfThisWeek && enterDate <= now : true;
-          break;
-        case "lastWeek":
-          matchesMonthFilter = enterDate ? enterDate >= startOfLastWeek && enterDate < startOfThisWeek : true;
-          break;
-        case "thisMonth":
-          matchesMonthFilter = enterDate
-            ? enterDate.getMonth() === now.getMonth() && enterDate.getFullYear() === now.getFullYear()
-            : true;
-          break;
-        case "lastMonth": {
-          const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-          matchesMonthFilter = enterDate
-            ? enterDate.getMonth() === lastMonth.getMonth() && enterDate.getFullYear() === lastMonth.getFullYear()
-            : true;
-          break;
-        }
-        case "last3Months":
-          matchesMonthFilter = enterDate ? enterDate >= startOfLast3Months && enterDate <= now : true;
-          break;
-        case "custom":
-          if (!hasCustomRange) {
-            // no custom range set yet => don't restrict by date (so user won't lose everything while choosing)
-            matchesMonthFilter = true;
-          } else {
-            matchesMonthFilter = enterDate
-              ? enterDate >= customFromDate && enterDate <= customToDate
-              : false; // if trip has no EnterTime, exclude for custom range
-          }
-          break;
-        default:
-          matchesMonthFilter = true;
-      }
-
-      return matchesSearch && matchesFilter && matchesMonthFilter;
+      return matchesSearch && matchesFilter && true;
     });
-  }, [trips, search, filter, monthsFilter, customFrom, customTo]);
+  }, [users, search, filter, monthsFilter, customFrom, customTo]);
 
-  const totalWeight = useMemo(() => filteredTrips.reduce((acc, trip) => acc + parseInt(trip?.weight || 0, 10), 0), [filteredTrips]);
+  const totalWeight = 500;
 
   return (
     <div className="bg-gray-900 text-gray-100 min-h-screen font-sans">
@@ -234,11 +121,9 @@ export default function Home() {
             </h1>
             <div className="flex ">
               <p className="text-xl text-orange-500 px-2 py-4 flex flex-col justify-center items-center">
-                Total Trips <span className="text-white">{filteredTrips.length}</span>
+                Total Users <span className="text-white">{filteredUsers.length}</span>
               </p>
-              <p className="text-xl text-orange-500 px-2 py-4 flex flex-col justify-center items-center">
-                Total Weight <span className="text-white"> {totalWeight} kg</span>
-              </p>
+              
             </div>
           </div>
 
@@ -265,16 +150,16 @@ export default function Home() {
                 </svg>
               </div>
               {/* Create Trip button for desktop view */}
-              <div className={`hidden sm:block ${isAdmin !== "suppervisor2" ? "hidden" : ""}`}>
+              <div className={`hidden sm:block ${isAdmin === "admin" ? "hidden" : ""}`}>
                 <Link
-                  href="/create"
+                  href="/registere"
                   className="w-full text-center bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105 text-base block sm:inline-block sm:w-auto"
                 >
                   <div className="flex gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
-                    Create
+                    Add User
                   </div>
                 </Link>
               </div>
@@ -286,25 +171,9 @@ export default function Home() {
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
                 >
-                  <option value="all">All Trips</option>
-                  <option value="entered">Active</option>
-                  <option value="exited">Completed</option>
-                </select>
-              </div>
-
-              <div className="hidden sm:block w-full sm:w-auto">
-                <select
-                  className="border border-gray-600 rounded-lg py-3 px-4 bg-gray-700 text-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 w-full sm:w-auto"
-                  value={monthsFilter}
-                  onChange={(e) => handleMonthsFilterChange(e.target.value)}
-                >
-                  <option value="today">Today</option>
-                  <option value="thisWeek">This Week</option>
-                  <option value="lastWeek">Last Week</option>
-                  <option value="thisMonth">This Month</option>
-                  <option value="lastMonth">Last Month</option>
-                  <option value="last3Months">Last 3 Months</option>
-                  <option value="custom">Custom Date</option>
+                  <option value="all">All Users</option>
+                  <option value="active">Active</option>
+                  <option value="unactive">Un-active</option>
                 </select>
               </div>
 
@@ -327,7 +196,6 @@ export default function Home() {
             {/* Desktop Dropdown Menu */}
             {isProfileDropdownOpen && (
               <div className="hidden sm:block absolute right-0 mt-2 w-48 bg-gray-700 rounded-md shadow-lg z-50">
-                
                 <Link href={"/users"} className={`block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-md transition-colors duration-300 ${isAdmin !== "admin" ? "hidden" : ""}`}>
                   All user
                 </Link>
@@ -364,33 +232,36 @@ export default function Home() {
                 </div>
               </div>
             ))
-          ) : filteredTrips.length > 0 ? (
-            filteredTrips.map((trip) => (
-              <Link key={trip._id} href={`/view/${trip._id}`}>
+          ) : filteredUsers.length > 0 ? (
+            filteredUsers.map((user) => (
+              <div key={user._id} >
                 <div className="bg-gray-700 p-4 rounded-lg shadow-md border mb-4 border-gray-600 cursor-pointer hover:bg-gray-600 transition-colors duration-200">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-semibold text-gray-400">Trip No.</span>
-                    <span className="text-base font-medium">{trip.tripNumber}</span>
+                    <span className="text-sm font-semibold text-gray-400">Full name</span>
+                    <span className="text-base font-medium">{user.name}</span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-semibold text-gray-400">Truck No.</span>
-                    <span className="text-base font-medium">{trip.truckNumber}</span>
+                    <span className="text-sm font-semibold text-gray-400">Username</span>
+                    <span className="text-base font-medium">{user.username}</span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-semibold text-gray-400">Company</span>
-                    <span className="text-base font-medium">{trip.companyName}</span>
+                    <span className="text-sm font-semibold text-gray-400">Email</span>
+                    <span className="text-base font-medium">{user.email}</span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-semibold text-gray-400">Status</span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${trip.ExitTime ? "bg-green-600" : "bg-yellow-500 text-black"}`}>
-                      {trip.ExitTime ? "Completed" : "Active"}
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${user.status === "active" ? "bg-green-600 text-green-100" : "bg-red-600 text-red-100"}`}>{user.status}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-semibold text-gray-400">Role</span>
+                    <span className="text-base font-medium">{user.role}
                     </span>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))
           ) : (
-            <div>No trips found.</div>
+            <div>No users found.</div>
           )}
         </div>
 
@@ -399,16 +270,13 @@ export default function Home() {
           <table className="min-w-full bg-gray-700 text-gray-200 rounded-lg">
             <thead>
               <tr className="bg-gray-600 text-left text-sm font-semibold uppercase tracking-wider">
-                <th className="p-4 border-b border-gray-500">Trip No.</th>
-                <th className="p-4 border-b border-gray-500">Truck No.</th>
-                <th className="p-4 border-b border-gray-500">Weight</th>
-                <th className="p-4 border-b border-gray-500 hidden sm:table-cell">Company</th>
-                <th className="p-4 border-b border-gray-500">Supervisor 1</th>
-                <th className="p-4 border-b border-gray-500">Supervisor 2</th>
-                <th className="p-4 border-b border-gray-500 hidden md:table-cell">Entry Time</th>
-                <th className="p-4 border-b border-gray-500 hidden md:table-cell">Exit Time</th>
+                <th className="p-4 border-b border-gray-500 hidden sm:table-cell">Sr. No.</th>
+                <th className="p-4 border-b border-gray-500">Full Name</th>
+                <th className="p-4 border-b border-gray-500">Username</th>
+                <th className="p-4 border-b border-gray-500">Email</th>
+                <th className="p-4 border-b border-gray-500 hidden sm:table-cell">Role</th>
                 <th className="p-4 border-b border-gray-500">Status</th>
-                <th className="p-4 border-b border-gray-500 text-center">Actions</th>
+                
               </tr>
             </thead>
             <tbody>
@@ -441,32 +309,20 @@ export default function Home() {
                     </td>
                   </tr>
                 ))
-              ) : filteredTrips.length > 0 ? (
-                filteredTrips.map((trip) => (
-                  <tr key={trip._id} className="border-b border-gray-600 transition-colors duration-200">
-                    <td className="p-4">{trip.tripNumber}</td>
-                    <td className="p-4">{trip.truckNumber}</td>
-                    <td className="p-4">{trip.weight}kg</td>
-                    <td className="p-4 hidden sm:table-cell">{trip.companyName}</td>
-                    <td className="p-4">{trip.Suppervisor1?.name}</td>
-                    <td className="p-4">{trip.Suppervisor2 ? trip.Suppervisor2 : "—"}</td>
-                    <td className="p-4  flex flex-col"><span>{formatDistanceToNow(new Date(trip.EnterTime), { addSuffix: true })}</span> <span>{new Date(trip.EnterTime).toLocaleString()}</span></td>
-                    <td className="p-4  "><span>{trip.ExitTime ? formatDistanceToNow(new Date(trip.ExitTime), { addSuffix: true }) : "—"}</span> <span>{trip.ExitTime ? new Date(trip.ExitTime).toLocaleString() : "—"}</span></td>
-                    <td className="p-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${trip.ExitTime ? "bg-green-600" : "bg-yellow-500 text-black"}`}>
-                        {trip.ExitTime ? "Completed" : "Active"}
-                      </span>
-                    </td>
-                    <td className="p-4 text-center">
-                      <div className="flex items-center justify-center flex-wrap gap-2">
-                        <Link href={`/view/${trip._id}`} className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition duration-300">View</Link>
-                      </div>
-                    </td>
+              ) : filteredUsers.length > 0 ? (
+                filteredUsers.map((user,idx) => (
+                  <tr key={user._id} className="border-b border-gray-600 transition-colors duration-200">
+                    <td className="p-4 hidden sm:table-cell">{idx+1}</td>
+                    <td className="p-4">{user.name}</td>
+                    <td className="p-4">{user.username}</td>
+                    <td className="p-4">{user.email}</td>
+                    <td className="p-4 hidden sm:table-cell">{user.role}</td>
+                    <td className="p-4">{user.status}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td className="p-4">No trips found</td>
+                  <td className="p-4">No User found</td>
                 </tr>
               )}
             </tbody>
@@ -476,12 +332,12 @@ export default function Home() {
 
       {/* Fixed "Create New Trip" button for mobile */}
       <div className="fixed bottom-0 flex gap-3 left-0 right-0 p-4 bg-gray-900 border-t border-gray-700 sm:hidden z-40">
-        <Link href="/create" className="w-full text-center bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105 text-base block">
+        <Link href="/registere" className="w-full text-center bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105 text-base block">
           <div className="flex gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            Create Trip
+            + Add User
           </div>
         </Link>
 
@@ -520,9 +376,9 @@ export default function Home() {
 
             <button onClick={() => handleFilterChange("all")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${filter === "all" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>All Trips</button>
 
-            <hr className="border-gray-700"></hr>
+            {/* <hr className="border-gray-700"></hr> */}
 
-            <button onClick={() => handleMonthsFilterChange("today")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "today" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>Today</button>
+            {/* <button onClick={() => handleMonthsFilterChange("today")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "today" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>Today</button>
 
             <button onClick={() => handleMonthsFilterChange("thisWeek")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "thisWeek" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>This Week</button>
 
@@ -531,7 +387,7 @@ export default function Home() {
             <button onClick={() => handleMonthsFilterChange("thisMonth")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "thisMonth" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>This Month</button>
             <button onClick={() => handleMonthsFilterChange("lastMonth")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "lastMonth" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>Last Month</button>
             <button onClick={() => handleMonthsFilterChange("last3Months")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "last3Months" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>Last 3 Months</button>
-            <button onClick={() => handleMonthsFilterChange("custom")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "custom" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>Custom Date</button>
+            <button onClick={() => handleMonthsFilterChange("custom")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${monthsFilter === "custom" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>Custom Date</button> */}
           </div>
         </div>
       </div>
@@ -558,32 +414,7 @@ export default function Home() {
       {(isFilterOpen || isProfileDropdownOpen) && <div onClick={() => { setIsFilterOpen(false); setIsProfileDropdownOpen(false); }} className="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-40 sm:hidden"></div>}
 
       {/* Custom Date Popup */}
-      {isCustomPopupOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[rgba(0,0,0,0.5)] z-50">
-          <div className="bg-gray-800 p-6 rounded-xl shadow-lg w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold mb-4 text-white">Select Date Range (past only)</h3>
-
-            <div className="flex flex-col gap-4">
-              <div>
-                <label className="block text-gray-300 mb-1">From</label>
-                <input type="date" max={todayString} value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-gray-200" />
-              </div>
-
-              <div>
-                <label className="block text-gray-300 mb-1">To</label>
-                <input type="date" max={todayString} value={customTo} onChange={(e) => setCustomTo(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-gray-200" />
-              </div>
-
-              {customError && <div className="text-sm text-red-400">{customError}</div>}
-            </div>
-
-            <div className="flex justify-end gap-3 mt-6">
-              <button onClick={handleCustomCancel} className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white">Cancel</button>
-              <button onClick={handleCustomOk} className="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white">OK</button>
-            </div>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }

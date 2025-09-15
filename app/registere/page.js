@@ -42,27 +42,18 @@ export default function Page() {
     });
 
     const data = await res.json();
-    // console.log(data)
-    if (data.success) {
-      // localStorage.setItem("token", data.token);
+    if (data.message === "Admin created successfully") {
       router.push("/login");
       setLoading(false);
     } else {
       alert("Invalid credentials ❌");
       setLoading(false);
+      // console.log(data);
     }
   };
 
   return (
     <div className="flex h-screen bg-[#002b36] text-white">
-      {/* Left Section */}
-      <div className="hidden md:flex flex-1 items-center justify-center flex-col border-r border-gray-700">
-        <div className="flex flex-col items-center">
-          {/* Replace with your logo */}
-          <div className="w-16 h-16 bg-gradient-to-b from-teal-500 to-orange-500 rounded-full mb-4"></div>
-          <h1 className="text-2xl font-semibold">Bailey and Co.</h1>
-        </div>
-      </div>
 
       {/* Right Section */}
       <div className="flex flex-1 items-center justify-center">
@@ -70,8 +61,8 @@ export default function Page() {
           onSubmit={handleLogin}
           className="w-full max-w-sm bg-transparent p-8"
         >
-          <h2 className="text-3xl font-light mb-2">Welcome</h2>
-          <p className="mb-6 text-gray-300">Please login to Admin Dashboard.</p>
+          <h2 className="text-3xl font-light mb-2">+ Add new User</h2>
+          {/* <p className="mb-6 text-gray-300">A</p> */}
 
           <input
             type="text"
@@ -124,8 +115,9 @@ export default function Page() {
             className="w-full p-3 mb-6 rounded bg-transparent border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
             required
           >
-            <option value="suppervisor">suppervisor</option>
-            <option value="admin">Admin</option>          
+            <option value="suppervisor1" className='text-black'>suppervisor 1</option>
+            <option value="suppervisor2" className='text-black'>suppervisor 2</option>
+            <option value="admin" className='text-black'>Admin</option>          
           </select>
 
           <button
@@ -134,10 +126,6 @@ export default function Page() {
           >
             {loading ? "Loading..." : "Register"}
           </button>
-
-          <p className="text-center mt-4 text-sm text-gray-400 cursor-pointer hover:text-white">
-            Forgotten your password?
-          </p>
         </form>
       </div>
     </div>
