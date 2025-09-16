@@ -18,10 +18,6 @@ export default function Page() {
   // custom date states
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
-  const [isCustomPopupOpen, setIsCustomPopupOpen] = useState(false);
-//   const [customError, setCustomError] = useState("");
-  const [prevMonthsFilter, setPrevMonthsFilter] = useState("thisMonth");
-
 
   let uid;
 
@@ -51,23 +47,12 @@ export default function Page() {
         // body: JSON.stringify({ id: localStorage.getItem("user") || uid }),
       });
       const data = await res.json();
-      console.log("Fetched users:", data);
+      // console.log("Fetched users:", data);
       setUsers(data|| []);
       setLoading(false);
     } catch (error) {
       console.error("Failed to fetch trips:", error);
       setLoading(false);
-    }
-  };
-
-  // helper: normalize trip date to JS Date
-  const toDateObj = (val) => {
-    if (!val) return null;
-    if (val instanceof Date) return val;
-    try {
-      return new Date(val);
-    } catch {
-      return null;
     }
   };
 
@@ -108,7 +93,22 @@ export default function Page() {
     });
   }, [users, search, filter, monthsFilter, customFrom, customTo]);
 
-  const totalWeight = 500;
+  const handleDeleteUser = async (id) => {
+    try {
+      const res = await fetch(`/api/deleteUser`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      console.log(data);
+      fetchTrips();
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+    }
+  };
+
+  // console.log(filteredUsers);
 
   return (
     <div className="bg-gray-900 text-gray-100 min-h-screen font-sans">
@@ -276,7 +276,8 @@ export default function Page() {
                 <th className="p-4 border-b border-gray-500">Email</th>
                 <th className="p-4 border-b border-gray-500 hidden sm:table-cell">Role</th>
                 <th className="p-4 border-b border-gray-500">Status</th>
-                
+                <th className="p-4 border-b border-gray-500">Delete</th>
+                <th className="p-4 border-b border-gray-500">Update</th>
               </tr>
             </thead>
             <tbody>
@@ -318,6 +319,8 @@ export default function Page() {
                     <td className="p-4">{user.email}</td>
                     <td className="p-4 hidden sm:table-cell">{user.role}</td>
                     <td className="p-4">{user.status}</td>
+                    <td className="p-4"><button onClick={() => handleDeleteUser(user._id)} className="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-red-700 transition duration-300 transform hover:scale-105">Delete</button></td>
+                    <td className="p-4"><Link href={`/registere?id=${user._id}`} className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition duration-300 transform hover:scale-105">Update</Link></td>
                   </tr>
                 ))
               ) : (

@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
-    const id = req.body;
+    const {id} = req.body;
     console.log("Received ID:", id);
     try {
         const user = await Admin.findById(id).select('-password');

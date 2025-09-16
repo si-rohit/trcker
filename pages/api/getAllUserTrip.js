@@ -11,7 +11,7 @@ export default async function handler(req, res) {
             if (!id) {
                 return res.json({ error: "User ID is required" }, { status: 400 });
             }
-            const trips = await Trip.find({ Suppervisor1: id });
+            const trips = await Trip.find({ Suppervisor1: id }).sort({ createdAt: -1 });
             // const userDetails = await Trip.find({ Suppervisor2: id });
             // trips.push(...userDetails);
             const SuppervisorDetails = await Admin.findById(id).select('-password');
