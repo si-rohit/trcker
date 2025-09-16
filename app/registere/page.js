@@ -91,7 +91,7 @@ export default function Page() {
       router.push("/users");
       setLoading(false);
     } else {
-      alert("Invalid credentials ❌");
+      alert("something went wrong");
       setLoading(false);
       // console.log(data);
     }

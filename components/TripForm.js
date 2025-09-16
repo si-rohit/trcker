@@ -94,6 +94,10 @@ export default function TripForm() {
     }
   };
 
+  const handleClose = () => {
+    setOpenTakePhoto(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
       {/* Header with sticky position */}
@@ -109,7 +113,7 @@ export default function TripForm() {
       </div>
 
       {/* Form Section */}
-      <div className=" flex justify-center p-4 gap-8">
+      <div className=" flex justify-center p-4 gap-8 max-[600px]:flex-col">
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 rounded-2xl shadow-2xl w-full max-w-lg">
           {/* Trip Number Input */}
           <input
@@ -207,7 +211,7 @@ export default function TripForm() {
           </button>:<img src={URL.createObjectURL(form.UnloadedImage2)} alt="Unloaded Image 2" className=" object-cover" />
           }
         </div>
-        {openTakePhoto && <TakePhoto setOpenTakePhoto={setOpenTakePhoto} form={form} setForm={setForm} clickButton={clickButton} uploadType={"LoadedImage"} />}
+        {openTakePhoto && <TakePhoto handleClose={handleClose} form={form} setForm={setForm} clickButton={clickButton} uploadType={"LoadedImage"} />}
       </div>
     </div>
   );

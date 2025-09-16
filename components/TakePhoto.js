@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
 
-const TakePhoto = ({ setOpenTakePhoto, form, setForm ,clickButton }) => {
+const TakePhoto = ({ handleClose, form, setForm ,clickButton }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -71,7 +71,7 @@ const TakePhoto = ({ setOpenTakePhoto, form, setForm ,clickButton }) => {
     <div className="relative rounded-lg flex flex-col items-center justify-center bg-black bg-opacity-90 z-50">
       <button
         className="absolute top-4 right-4 text-white text-2xl"
-        onClick={() => setOpenTakePhoto(false)}
+        onClick={() => handleClose()}
       >
         ✖
       </button>
