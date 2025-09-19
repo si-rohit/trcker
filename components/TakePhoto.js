@@ -6,18 +6,21 @@ const TakePhoto = ({ handleClose, form, setForm ,clickButton }) => {
   const canvasRef = useRef(null);
 
   // console.log(type)
-
   useEffect(() => {
     const startCamera = async () => {
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" }, // back camera if mobile
+          video: { facingMode: "environment" },
           audio: false,
         });
 
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
-          videoRef.current.play(); // force play
+
+          // videoRef.current.play() optional hai
+          videoRef.current.play().catch((err) => {
+            console.warn("Autoplay prevented:", err);
+          });
         }
       } catch (err) {
         console.error("Camera error:", err);
@@ -32,6 +35,7 @@ const TakePhoto = ({ handleClose, form, setForm ,clickButton }) => {
       }
     };
   }, []);
+
 
   const capturePhoto = () => {
     const video = videoRef.current;
@@ -59,7 +63,8 @@ const TakePhoto = ({ handleClose, form, setForm ,clickButton }) => {
           }));
 
           // console.log("Updated form:", form);
-          setOpenTakePhoto(false);
+          handleClose();
+          // setOpenTakePhoto(false);
         }
       },
       "image/png",

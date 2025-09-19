@@ -24,14 +24,24 @@ export default function TripForm() {
   });
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [uid, setUid] = useState('');
 
-  let uid = localStorage.getItem("user");
+
+  // let uid = localStorage.getItem("user");
 
   useEffect(() => {
-    if (!uid) router.push("/login");
-  }, [uid]);
+  const token = localStorage.getItem("user");
+  setUid(token);
+}, []);
 
-  // console.log(uid);
+useEffect(() => {
+  if (uid === '') return; // jab tak value load nahi hoti kuch mat kar
+  if (!uid) router.push("/login");
+}, [uid]);
+
+// console.log(uid);
+
+  console.log(uid);
 
   const handleChange = (e) => {
     if (e.target.type === "file") {

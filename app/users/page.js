@@ -2,7 +2,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
 
 export default function Page() {
   const [users, setUsers] = useState([]);
@@ -116,9 +115,9 @@ export default function Page() {
       <div className="sticky top-0 z-50 bg-gray-900 border-b border-gray-700">
         <div className="p-3 md:px-8 max-w-8xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-1xl md:text-3xl font-extralight border-2 border-orange-500 rounded-full p-2 px-4 flex items-center justify-center">
+            <Link href="/" className="text-1xl md:text-3xl font-extralight border-2 border-orange-500 rounded-full p-2 px-4 flex items-center justify-center">
               <span className="font-bold text-orange-500">T</span>
-            </h1>
+            </Link>
             <div className="flex ">
               <p className="text-xl text-orange-500 px-2 py-4 flex flex-col justify-center items-center">
                 Total Users <span className="text-white">{filteredUsers.length}</span>
