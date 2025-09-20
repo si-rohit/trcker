@@ -2,6 +2,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import VideoPlayer from "@/components/VideoPlayer";
 
 export default function Page() {
   const [users, setUsers] = useState([]);
@@ -10,6 +11,7 @@ export default function Page() {
   const [monthsFilter, setMonthsFilter] = useState("thisMonth");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isLogoutDropdownOpen, setIsLogoutDropdownOpen] = useState(false);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState("");
@@ -118,7 +120,7 @@ export default function Page() {
             <Link href="/" className="text-1xl md:text-3xl font-extralight border-2 border-orange-500 rounded-full p-2 px-4 flex items-center justify-center">
               <span className="font-bold text-orange-500">T</span>
             </Link>
-            <div className="flex ">
+            <div className="flex max-[769px]:hidden">
               <p className="text-xl text-orange-500 px-2 py-4 flex flex-col justify-center items-center">
                 Total Users <span className="text-white">{filteredUsers.length}</span>
               </p>
@@ -194,15 +196,18 @@ export default function Page() {
 
             {/* Desktop Dropdown Menu */}
             {isProfileDropdownOpen && (
-              <div className="hidden sm:block absolute right-0 mt-2 w-48 bg-gray-700 rounded-md shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-48 bg-gray-700 rounded-md shadow-lg z-50">
                 <Link href={"/users"} className={`block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-md transition-colors duration-300 ${isAdmin !== "admin" ? "hidden" : ""}`}>
                   All user
                 </Link>
-                <Link href={"/"} className={`block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-md transition-colors duration-300 ${isAdmin !== "admin" ? "hidden" : ""}`}>
+                {/* <Link href={"/"} className={`block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-md transition-colors duration-300 ${isAdmin !== "admin" ? "hidden" : ""}`}>
                   All Trips
-                </Link>
+                </Link> */}
 
-                <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-md transition-colors duration-300">
+                 <button onClick={()=>{setIsLogoutDropdownOpen(true); setIsProfileDropdownOpen(false)} } className="hidden max-[769px]:block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-md transition-colors duration-300">
+                  Logout
+                </button>
+                <button onClick={handleLogout} className="max-[769px]:hidden block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-md transition-colors duration-300">
                   Logout
                 </button>
               </div>
@@ -376,11 +381,11 @@ export default function Page() {
             </button>
           </div>
           <div className="flex flex-col gap-2">
-            <button onClick={() => handleFilterChange("entered")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${filter === "entered" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>Active</button>
+            <button onClick={() => handleFilterChange("active")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${filter === "active" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>Active</button>
 
-            <button onClick={() => handleFilterChange("exited")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${filter === "exited" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>Completed</button>
+            <button onClick={() => handleFilterChange("unactive")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${filter === "unactive" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>Unactive</button>
 
-            <button onClick={() => handleFilterChange("all")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${filter === "all" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>All Trips</button>
+            <button onClick={() => handleFilterChange("all")} className={`py-3 px-4 rounded-lg font-semibold w-full transition-colors duration-300 ${filter === "all" ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`}>All User</button>
 
             {/* <hr className="border-gray-700"></hr> */}
 
@@ -399,27 +404,29 @@ export default function Page() {
       </div>
 
       {/* Off-canvas Profile Menu for Mobile */}
-      <div className={`fixed bottom-0 left-0 right-0 z-50 transform transition-transform duration-300 ease-in-out sm:hidden ${isProfileDropdownOpen ? "translate-y-0" : "translate-y-full"}`}>
+      <div className={`fixed bottom-0 left-0 right-0 z-50 transform transition-transform duration-300 ease-in-out sm:hidden ${isLogoutDropdownOpen ? "translate-y-0" : "translate-y-full"}`}>
         <div className="bg-gray-800 rounded-t-2xl p-6 shadow-2xl border-t border-gray-700">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold">Do you want to logout?</h3>
-            <button onClick={() => setIsProfileDropdownOpen(false)} className="text-gray-400 hover:text-white">
+            <button onClick={() => setIsLogoutDropdownOpen(false)} className="text-gray-400 hover:text-white">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
           <div className="flex gap-3 justify-center">
-            <button onClick={() => setIsProfileDropdownOpen(false)} className=" text-center text-white font-semibold py-3 px-6 rounded-lg shadow-md bg-gray-700 hover:bg-gray-600 transition-colors duration-300">No</button>
+            <button onClick={() => setIsLogoutDropdownOpen(false)} className=" text-center text-white font-semibold py-3 px-6 rounded-lg shadow-md bg-gray-700 hover:bg-gray-600 transition-colors duration-300">No</button>
             <button onClick={handleLogout} className="text-center bg-red-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-red-700 transition duration-300">Yes</button>
           </div>
         </div>
       </div>
 
       {/* Overlay to dim background when off-canvas is open */}
-      {(isFilterOpen || isProfileDropdownOpen) && <div onClick={() => { setIsFilterOpen(false); setIsProfileDropdownOpen(false); }} className="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-40 sm:hidden"></div>}
+      {(isFilterOpen || isProfileDropdownOpen || isLogoutDropdownOpen) && <div onClick={() => { setIsFilterOpen(false); setIsProfileDropdownOpen(false); setIsLogoutDropdownOpen(false); }} className="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-40 sm:hidden"></div>}
 
       {/* Custom Date Popup */}
+
+      <VideoPlayer />
       
     </div>
   );

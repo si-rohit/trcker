@@ -41,7 +41,7 @@ useEffect(() => {
 
 // console.log(uid);
 
-  console.log(uid);
+  // console.log(uid);
 
   const handleChange = (e) => {
     if (e.target.type === "file") {
@@ -167,7 +167,7 @@ useEffect(() => {
           />
 
           {/* Submit Button */}
-          <button type="submit" className="bg-orange-600 text-white px-4 py-4 flex items-center gap-2 justify-center rounded-lg w-full font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105">
+          <button type="submit" className="bg-orange-600 max-[769px]:hidden text-white px-4 py-4 flex items-center gap-2 justify-center rounded-lg w-full font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105">
             {loading ? 'Loading...' : <span className="flex items-center gap-2">
               <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
                 Create 
@@ -221,6 +221,12 @@ useEffect(() => {
           </button>:<img src={URL.createObjectURL(form.UnloadedImage2)} alt="Unloaded Image 2" className=" object-cover" />
           }
         </div>
+        <button onClick={(e)=> handleSubmit(e)} className="bg-orange-600 text-white px-4 py-4 hidden max-[769px]:flex items-center gap-2 justify-center rounded-lg w-full font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105">
+            {loading ? 'Loading...' : <span className="flex items-center gap-2">
+              <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                Create 
+              </span>}
+          </button>
         {openTakePhoto && <TakePhoto handleClose={handleClose} form={form} setForm={setForm} clickButton={clickButton} uploadType={"LoadedImage"} />}
       </div>
     </div>

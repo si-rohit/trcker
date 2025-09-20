@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import TakePhoto from "@/components/TakePhoto";
+import { sk } from "date-fns/locale";
 
 export default function Page() {
   const { id } = useParams();
@@ -23,6 +24,7 @@ export default function Page() {
     });
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [scaltonLoading, setScaltonLoading] = useState(false);
   
     let uid = localStorage.getItem("user");
     if (!uid) {
@@ -39,6 +41,7 @@ export default function Page() {
 
     useEffect(() => {
       const getdetails = async () => {
+        setScaltonLoading(true);
         try {
           const res = await fetch('/api/getAndDeleteTrip', { method: "POST", body: id });
           const dataa = await res.json();
@@ -58,8 +61,10 @@ export default function Page() {
             UnloadedImage1: data.UnloadedImage1 || null,
             UnloadedImage2: data.UnloadedImage2 || null,
           });
+          setScaltonLoading(false);
         } catch (error) {
           console.log(error);
+          setScaltonLoading(false);
           alert("Failed to fetch trip details.");
         }
       };
@@ -105,7 +110,15 @@ export default function Page() {
       }
     };
 
-    console.log(form);
+    const handleClose = () => {
+      setOpenTakePhoto(false);
+    };
+
+    const SkeletonBox = ({ className }) => (
+      <div className={`animate-pulse bg-gray-700 rounded-lg ${className}`} />
+    );
+
+    // console.log(form);
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
@@ -122,7 +135,33 @@ export default function Page() {
       </div>
 
       {/* Form Section */}
-      <div className=" flex justify-center p-4 gap-8">
+      {
+        scaltonLoading && (
+          <div className="flex max-[769px]:flex-col justify-center p-4 gap-8 w-full">
+            {/* Left Form Skeleton */}
+            <div className="flex flex-col gap-6 rounded-2xl shadow-2xl w-full max-w-lg p-4">
+              {/* Input Skeletons */}
+              <SkeletonBox className="w-full h-12" />
+              <SkeletonBox className="w-full h-12" />
+              <SkeletonBox className="w-full h-12" />
+              <SkeletonBox className="w-full h-12" />
+
+              {/* Button Skeleton */}
+              <SkeletonBox className="w-full h-14" />
+            </div>
+
+            {/* Right Image Grid Skeleton */}
+            <div className="grid grid-cols-2 gap-4 w-[400px]">
+              {Array(8)
+                .fill(0)
+                .map((_, idx) => (
+                  <SkeletonBox key={idx} className="w-full h-20" />
+                ))}
+            </div>
+          </div>
+        )
+      }
+      <div className={`flex max-[769px]:flex-col justify-center p-4 gap-8 ${scaltonLoading ? "hidden" : ""}`}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 rounded-2xl shadow-2xl w-full max-w-lg">
           {/* Trip Number Input */}
           <input
@@ -170,7 +209,7 @@ export default function Page() {
           />
 
           {/* Submit Button */}
-          <button type="submit" className="bg-orange-600 text-white px-4 py-4 flex items-center gap-2 justify-center rounded-lg w-full font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105">
+          <button type="submit" className="bg-orange-600 max-[769px]:hidden text-white px-4 py-4 flex items-center gap-2 justify-center rounded-lg w-full font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105">
             {loading ? 'Loading...' : <span className="flex items-center gap-2">
               <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
                 Update 
@@ -224,7 +263,13 @@ export default function Page() {
           </button>:<img src={form.UnloadedImage2 instanceof File ? URL.createObjectURL(form.UnloadedImage2) : form.UnloadedImage2} alt="Unloaded Image 2" className="h-20 object-cover" />
           }
         </div>
-        {openTakePhoto && <TakePhoto setOpenTakePhoto={setOpenTakePhoto} form={form} setForm={setForm} clickButton={clickButton} />}
+        <button onClick={(e)=>handleSubmit(e)} className="bg-orange-600 hidden  text-white px-4 py-4 max-[769px]:flex items-center gap-2 justify-center rounded-lg w-full font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105">
+            {loading ? 'Loading...' : <span className="flex items-center gap-2">
+              <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                Update 
+              </span>}
+        </button>
+        {openTakePhoto && <TakePhoto handleClose={handleClose} form={form} setForm={setForm} clickButton={clickButton} />}
       </div>
     </div>
   );

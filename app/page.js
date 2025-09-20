@@ -11,6 +11,7 @@ export default function Home() {
   const [monthsFilter, setMonthsFilter] = useState("thisMonth");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isLogoutDropdownOpen, setIsLogoutDropdownOpen] = useState(false);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState("");
@@ -35,7 +36,7 @@ export default function Home() {
 
   useEffect(() => {
     const token = localStorage.getItem("user");
-    console.log(token);
+    // console.log(token);
     const role = localStorage.getItem("role");
     if (!role) {
       router.push("/login");
@@ -235,7 +236,7 @@ export default function Home() {
             <Link href="/" className="text-1xl md:text-3xl font-extralight border-2 border-orange-500 rounded-full p-2 px-4 flex items-center justify-center">
               <span className="font-bold text-orange-500">T</span>
             </Link>
-            <div className="flex ">
+            <div className="flex max-[769px]:hidden">
               <p className="text-xl text-orange-500 px-2 py-4 flex flex-col justify-center items-center">
                 Total Trips <span className="text-white">{filteredTrips.length}</span>
               </p>
@@ -329,17 +330,30 @@ export default function Home() {
 
             {/* Desktop Dropdown Menu */}
             {isProfileDropdownOpen && (
-              <div className="hidden sm:block absolute right-0 mt-2 w-48 bg-gray-700 rounded-md shadow-lg z-50">
+              <div className=" absolute right-0 mt-2 w-48 bg-gray-700 rounded-md shadow-lg z-50">
                 
                 <Link href={"/users"} className={`block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-md transition-colors duration-300 ${isAdmin !== "admin" ? "hidden" : ""}`}>
                   All user
                 </Link>
-                <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-md transition-colors duration-300">
+                <button onClick={()=>{setIsLogoutDropdownOpen(true); setIsProfileDropdownOpen(false)} } className="hidden max-[769px]:block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-md transition-colors duration-300">
+                  Logout
+                </button>
+                <button onClick={handleLogout} className="max-[769px]:hidden block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-md transition-colors duration-300">
                   Logout
                 </button>
               </div>
             )}
           </div>
+        </div>
+
+        {/* Mobile View total count */}
+        <div className="hidden max-[769px]:flex justify-center items-center gap-5 mb-2">
+          <p className="text-xl text-orange-500 px-6 py-1 bg-gray-700 rounded-lg flex flex-col justify-center items-center">
+            Total Trips <span className="text-white">{filteredTrips.length}</span>
+          </p>
+          <p className="text-xl text-orange-500 px-6 py-1 bg-gray-700 rounded-lg flex flex-col justify-center items-center">
+            Total Weight <span className="text-white"> {totalWeight} kg</span>
+          </p>
         </div>
       </div>
 
@@ -480,7 +494,7 @@ export default function Home() {
       {/* Fixed "Create New Trip" button for mobile */}
       <div className="fixed bottom-0 flex gap-3 left-0 right-0 p-4 bg-gray-900 border-t border-gray-700 sm:hidden z-40">
         <Link href="/create" className="w-full text-center bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105 text-base block">
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
@@ -540,25 +554,25 @@ export default function Home() {
       </div>
 
       {/* Off-canvas Profile Menu for Mobile */}
-      <div className={`fixed bottom-0 left-0 right-0 z-50 transform transition-transform duration-300 ease-in-out sm:hidden ${isProfileDropdownOpen ? "translate-y-0" : "translate-y-full"}`}>
+      <div className={`fixed bottom-0 left-0 right-0 z-50 transform transition-transform duration-300 ease-in-out sm:hidden ${isLogoutDropdownOpen ? "translate-y-0" : "translate-y-full"}`}>
         <div className="bg-gray-800 rounded-t-2xl p-6 shadow-2xl border-t border-gray-700">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold">Do you want to logout?</h3>
-            <button onClick={() => setIsProfileDropdownOpen(false)} className="text-gray-400 hover:text-white">
+            <button onClick={() => setIsLogoutDropdownOpen(false)} className="text-gray-400 hover:text-white">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
           <div className="flex gap-3 justify-center">
-            <button onClick={() => setIsProfileDropdownOpen(false)} className=" text-center text-white font-semibold py-3 px-6 rounded-lg shadow-md bg-gray-700 hover:bg-gray-600 transition-colors duration-300">No</button>
+            <button onClick={() => setIsLogoutDropdownOpen(false)} className=" text-center text-white font-semibold py-3 px-6 rounded-lg shadow-md bg-gray-700 hover:bg-gray-600 transition-colors duration-300">No</button>
             <button onClick={handleLogout} className="text-center bg-red-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-red-700 transition duration-300">Yes</button>
           </div>
         </div>
       </div>
 
       {/* Overlay to dim background when off-canvas is open */}
-      {(isFilterOpen || isProfileDropdownOpen) && <div onClick={() => { setIsFilterOpen(false); setIsProfileDropdownOpen(false); }} className="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-40 sm:hidden"></div>}
+      {(isFilterOpen || isProfileDropdownOpen || isLogoutDropdownOpen) && <div onClick={() => { setIsFilterOpen(false); setIsProfileDropdownOpen(false); setIsLogoutDropdownOpen(false); }} className="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-40 sm:hidden"></div>}
 
       {/* Custom Date Popup */}
       {isCustomPopupOpen && (

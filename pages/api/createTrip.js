@@ -80,6 +80,13 @@ export default async function handler(req, res) {
         }
       }
 
+      let ExitTime = null;
+      let Suppervisor2 = null;
+      if (uploadedFiles.FrontImage, uploadedFiles.TopImage, uploadedFiles.LoadedImage1, uploadedFiles.LoadedImage2, uploadedFiles.RoyaltyImage, uploadedFiles.WeightReciept, uploadedFiles.UnloadedImage1, uploadedFiles.UnloadedImage2) {
+        ExitTime = new Date();
+        Suppervisor2 = uid;
+      }
+
       const trip = await Trip.create({
         truckNumber,
         companyName,
@@ -95,6 +102,8 @@ export default async function handler(req, res) {
         WeightReciept: uploadedFiles.WeightReciept,
         UnloadedImage1: uploadedFiles.UnloadedImage1,
         UnloadedImage2: uploadedFiles.UnloadedImage2,
+        Suppervisor2,
+        ExitTime
       });
 
       return res.json({ success: true, trip });
