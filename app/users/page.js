@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import VideoPlayer from "@/components/VideoPlayer";
+import SnapshotPlayer from "@/components/SnapshotPlayer";
 
 export default function Page() {
   const [users, setUsers] = useState([]);
@@ -426,7 +427,8 @@ export default function Page() {
 
       {/* Custom Date Popup */}
 
-      <VideoPlayer />
+      {/* <VideoPlayer /> */}
+      {/* <SnapshotPlayer /> */}
       
     </div>
   );
