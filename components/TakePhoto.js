@@ -105,6 +105,13 @@
 //   );
 // };
 
+// rtsp://admin:hariom321@192.168.1.82:554/stream1
+// rtsp://admin:123456@192.168.1.122:554/cam/realmonitor?channel=1&subtype=0
+
+// rtsp://admin:123456@192.168.1.122:554/cam/realmonitor?channel=1&subtype=1
+// rtsp://admin:123456@192.168.1.122:554/h264/ch1/main/av_stream
+
+
 // export default TakePhoto;
 
 
