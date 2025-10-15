@@ -28,7 +28,7 @@ const VideoPlayer = () => {
   return (
     <video
       ref={videoRef}
-      controls
+      // controls
       autoPlay
       style={{ width: "600px", height: "400px", background: "black" }}
     />

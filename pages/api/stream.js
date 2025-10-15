@@ -42,7 +42,8 @@ import path from "path";
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 // 👇 Apna RTSP URL yahan daal
-const STREAM_URL = "rtsp://admin:123456@192.168.1.122:554/h264/ch1/main/av_stream";
+// const STREAM_URL = "rtsp://admin:123456@192.168.1.122:554/h264/ch1/main/av_stream";
+const STREAM_URL = "rtsp://170.93.143.139/rtplive/470011e600ef003a004ee33696235daa";
 const OUTPUT_DIR = path.join(process.cwd(), "public/hls");
 
 let processRunning = false;
@@ -86,7 +87,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       message: "Stream started successfully",
-      url: "/hls/index.m3u8",
+      url: "/hls/stream.m3u8",
     });
   } catch (err) {
     console.error("Handler Error:", err);

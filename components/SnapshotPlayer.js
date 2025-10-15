@@ -1,5 +1,7 @@
 // import React, { useState, useEffect } from 'react';
 
+const { useEffect } = require("react");
+
 // const SnapshotPlayer = () => {
 //     const [imageUrl, setImageUrl] = useState('');
 //     const [loading, setLoading] = useState(true);
