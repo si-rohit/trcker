@@ -63,6 +63,7 @@ export default function Home() {
         body: JSON.stringify({ id: localStorage.getItem("user") || uid }),
       });
       const data = await res.json();
+      console.log("Fetched trips:", data);
       setTrips(data.trips || []);
       setLoading(false);
     } catch (error) {

@@ -1,6 +1,7 @@
 import dbConnect from "@/lib/db";
 import Trip from "@/models/trip";
 import Admin from "@/models/Admin";
+import { tr } from "date-fns/locale";
 
 export default async function handler(req, res) {
     if (req.method === "POST") {
@@ -23,16 +24,31 @@ export default async function handler(req, res) {
                 trip.Suppervisor1 = SuppervisorDetails;
             });
 
-            if (trips.Suppervisor2 === undefined || trips.Suppervisor2 === null) {
-                return res.json({ trips });
-            }
+            // console.log(trips)
 
-            const Suppervisor2Details = await Admin.findById({id:trips.Suppervisor2}).select('-password');
-            if (Suppervisor2Details) {
-                trips.forEach(trip => {
+            // if (trips.Suppervisor2 === undefined || trips.Suppervisor2 === null) {
+            //     return res.json({ trips });
+            // }
+
+            trips.forEach(trip => async () => {
+                // if (trip.Suppervisor2 === undefined || trip.Suppervisor2 === null) {
+                //     return res.json({ trips });
+                // }
+                
+                const Suppervisor2Details = await Admin.findById(trip.Suppervisor2).select('-password');
+                console.log('Suppervisor2Details',Suppervisor2Details)
+                if (Suppervisor2Details) {
                     trip.Suppervisor2 = Suppervisor2Details;
-                });
-            }
+                }else{
+                    trip.Suppervisor2 = null
+                }
+            })
+            // const Suppervisor2Details = await Admin.findById({id:trips.Suppervisor2}).select('-password');
+            // if (Suppervisor2Details) {
+            //     trips.forEach(trip => {
+            //         trip.Suppervisor2 = Suppervisor2Details;
+            //     });
+            // }
             return res.json({ trips });
         } catch (error) {
             return res.json({ error: error.message }, { status: 500 });
