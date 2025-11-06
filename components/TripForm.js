@@ -127,7 +127,7 @@ useEffect(() => {
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 rounded-2xl shadow-2xl w-full max-w-lg">
           {/* Trip Number Input */}
           <input
-            type="text"
+            type="number"
             name="tripNumber"
             placeholder="Trip Number"
             value={form.tripNumber}
@@ -157,7 +157,7 @@ useEffect(() => {
           />
           {/* weight */}
           <input
-            type="text"
+            type="number"
             name="weight"
             placeholder="Weight"
             value={form.weight}
