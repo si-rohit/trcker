@@ -467,7 +467,7 @@ export default function Home() {
                     <td className="p-4">{trip.weight}kg</td>
                     <td className="p-4 hidden sm:table-cell">{trip.companyName}</td>
                     <td className="p-4">{trip.Suppervisor1?.name}</td>
-                    <td className="p-4">{trip.Suppervisor2 ? trip.Suppervisor2 : "—"}</td>
+                    <td className="p-4">{trip.Suppervisor2 ? trip.Suppervisor2?.name : "—"}</td>
                     <td className="p-4  flex flex-col"><span>{formatDistanceToNow(new Date(trip.EnterTime), { addSuffix: true })}</span> <span>{new Date(trip.EnterTime).toLocaleString()}</span></td>
                     <td className="p-4  "><span>{trip.ExitTime ? formatDistanceToNow(new Date(trip.ExitTime), { addSuffix: true }) : "—"}</span> <span>{trip.ExitTime ? new Date(trip.ExitTime).toLocaleString() : "—"}</span></td>
                     <td className="p-4">
