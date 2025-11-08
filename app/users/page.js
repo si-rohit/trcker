@@ -35,7 +35,7 @@ export default function Page() {
       router.push("/login");
       return;
     }
-    uid = token;
+    // uid = token;
     fetchTrips();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -93,7 +93,7 @@ export default function Page() {
 
       return matchesSearch && matchesFilter && true;
     });
-  }, [users, search, filter, monthsFilter, customFrom, customTo]);
+  }, [users, search, filter, monthsFilter]);
 
   const handleDeleteUser = async (id) => {
     try {

@@ -37,7 +37,7 @@ export default function TripForm() {
 useEffect(() => {
   if (uid === '') return; // jab tak value load nahi hoti kuch mat kar
   if (!uid) router.push("/login");
-}, [uid]);
+}, [uid, router]);
 
 // console.log(uid);
 

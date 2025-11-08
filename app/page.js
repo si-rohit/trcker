@@ -47,7 +47,7 @@ export default function Home() {
       router.push("/login");
       return;
     }
-    uid = token;
+    // uid = token;
     fetchTrips();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
