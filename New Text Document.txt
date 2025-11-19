@@ -1,0 +1,31 @@
+@echo off
+REM ==========================================
+REM Next.js Project Auto Runner (Single Click)
+REM ==========================================
+
+REM 1. Go to project folder
+cd /d "%~dp0trcker-main"
+
+REM 2. Check & install dependencies if missing
+if not exist "node_modules" (
+    echo Installing dependencies...
+    npm install
+)
+
+REM 3. Build project if not built already
+if not exist ".next" (
+    echo Building project...
+    npm run build
+)
+
+REM 4. Start project in new terminal window
+start "NextJS Server" cmd /k "npm run start"
+
+REM 5. Wait few seconds for server startup
+timeout /t 5 >nul
+
+REM 6. Open in browser
+start "" " http://192.168.56.1:3000"
+
+REM 7. Done
+exit

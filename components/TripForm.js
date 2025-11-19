@@ -4,6 +4,7 @@ import TakePhoto from "./TakePhoto";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { set } from "mongoose";
+import MobileCamera from "./MobileCamera";
 
 export default function TripForm() {
   const [openTakePhoto, setOpenTakePhoto] = useState(false);
@@ -227,7 +228,26 @@ useEffect(() => {
                 Create 
               </span>}
           </button>
-        {openTakePhoto && <TakePhoto handleClose={handleClose} form={form} setForm={setForm} clickButton={clickButton} uploadType={"LoadedImage"} />}
+        {openTakePhoto && (
+          typeof window !== "undefined" &&
+          window.location.origin === "https://trcker-plum.vercel.app" ? (
+            <MobileCamera
+              handleClose={handleClose}
+              form={form}
+              setForm={setForm}
+              clickButton={clickButton}
+            />
+          ) : (
+            <TakePhoto
+              handleClose={handleClose}
+              form={form}
+              setForm={setForm}
+              clickButton={clickButton}
+              uploadType={"LoadedImage"}
+            />
+          )
+        )}
+
       </div>
     </div>
   );
