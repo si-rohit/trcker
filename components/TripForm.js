@@ -124,7 +124,7 @@ useEffect(() => {
       </div>
 
       {/* Form Section */}
-      <div className=" flex justify-center p-4 gap-8 max-[600px]:flex-col">
+      <div className="overflow-y-hidden flex justify-center p-4 gap-8 max-[600px]:flex-col">
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 rounded-2xl shadow-2xl w-full max-w-lg">
           {/* Trip Number Input */}
           <input
@@ -176,7 +176,7 @@ useEffect(() => {
           </button>
         </form>
 
-        <div className={`grid grid-cols-2 max-[426px]:grid-cols-1 gap-4 w-[400px] ${openTakePhoto?'hidden':''}`}>
+        <div className={`grid grid-cols-2 max-[426px]:grid-cols-1 gap-4 max-w-[400px] ${openTakePhoto?'hidden':''}`}>
           {
             form.FrontImage === null ?        
             <button onClick={(e) => { e.preventDefault(); setClickButton('FrontImage'); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.FrontImage?'hidden':''}`}>
