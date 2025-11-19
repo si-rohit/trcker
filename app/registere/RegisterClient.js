@@ -90,15 +90,25 @@ export default function RegisterClient() {
   };
 
   return (
-    <div className="flex h-screen bg-[#002b36] text-white">
+    <div className="flex flex-col h-screen bg-gray-900 text-white">
+      <div className="sticky top-0 z-10 bg-gray-800 text-white py-4 px-4 flex items-center gap-4 shadow-md">
+        <span className="cursor-pointer text-orange-500" onClick={() => router.back()}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="24" viewBox="0 0 26 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M31 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
+        </span>
+        <p className="text-2xl font-light">{id ? "Update User" : "Add new User"} </p>
+        <div></div> {/* Spacer to balance header */}
+      </div>
       <div className="flex flex-1 items-center justify-center">
         <form
           onSubmit={id ? handleUpdate : handleLogin}
           className="w-full max-w-sm bg-transparent p-8"
         >
-          <h2 className="text-3xl font-light mb-2">
+          {/* <h2 className="text-3xl font-light mb-2">
             {id ? "Update User" : "+ Add new User"}
-          </h2>
+          </h2> */}
 
           <input
             type="text"
@@ -141,6 +151,9 @@ export default function RegisterClient() {
             className="w-full p-3 mb-6 rounded bg-transparent border border-gray-500 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
             required
           >
+            <option value="" className="text-black">
+              select role
+            </option>
             <option value="suppervisor1" className="text-black">
               Supervisor 1
             </option>
