@@ -7,28 +7,31 @@ export default function MobileCamera({ handleClose, form, setForm, clickButton }
   const [streamStarted, setStreamStarted] = useState(false);
 
   const startCamera = async () => {
-    let constraints = {
-        video: true   // default for laptop/PC
-    };
+  let constraints = {
+    video: { facingMode: "environment" }
+  };
 
-    // if mobile then use rear camera
-    const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    videoRef.current.srcObject = stream;
+    setStreamStarted(true);
+  } catch (error) {
+    console.log("Rear camera failed, trying front...", error);
 
-    if (isMobile) {
-        constraints = {
-        video: { facingMode: "environment" }
-        };
-    }
-
+    // fallback: front camera
     try {
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        videoRef.current.srcObject = stream;
-        setStreamStarted(true);
-    } catch (err) {
-        alert("Camera not available on this device!");
-        console.log(err);
+      const stream2 = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" }
+      });
+      videoRef.current.srcObject = stream2;
+      setStreamStarted(true);
+    } catch (err2) {
+      alert("Camera not available on this device!");
+      console.log("Both cameras failed: ", err2);
     }
-    };
+  }
+};
+
 
 
   const capturePhoto = () => {
