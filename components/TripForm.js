@@ -168,7 +168,7 @@ useEffect(() => {
           />
 
           {/* Submit Button */}
-          <button type="submit" className="bg-orange-600 max-[769px]:hidden text-white px-4 py-4 flex items-center gap-2 justify-center rounded-lg w-full font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105">
+          <button type="submit" className="bg-orange-600 max-[426px]:hidden text-white px-4 py-4 flex items-center gap-2 justify-center rounded-lg w-full font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105">
             {loading ? 'Loading...' : <span className="flex items-center gap-2">
               <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
                 Create 
@@ -176,7 +176,7 @@ useEffect(() => {
           </button>
         </form>
 
-        <div className={`grid grid-cols-2 gap-4 w-[400px] ${openTakePhoto?'hidden':''}`}>
+        <div className={`grid grid-cols-2 max-[426px]:grid-cols-1 gap-4 w-[400px] ${openTakePhoto?'hidden':''}`}>
           {
             form.FrontImage === null ?        
             <button onClick={(e) => { e.preventDefault(); setClickButton('FrontImage'); setOpenTakePhoto(true);}} className={`border-dashed border-2 border-orange-600 text-white px-4 py-3 flex items-center gap-2 justify-center rounded-lg font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform cursor-pointer w-full ${form.FrontImage?'hidden':''}`}>
@@ -222,7 +222,7 @@ useEffect(() => {
           </button>:<img src={URL.createObjectURL(form.UnloadedImage2)} alt="Unloaded Image 2" className=" object-cover" />
           }
         </div>
-        <button onClick={(e)=> handleSubmit(e)} className="bg-orange-600 text-white px-4 py-4 hidden max-[769px]:flex items-center gap-2 justify-center rounded-lg w-full font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105">
+        <button onClick={(e)=> handleSubmit(e)} className="bg-orange-600 text-white px-4 py-4 hidden max-[426px]:flex items-center gap-2 justify-center rounded-lg w-full font-semibold shadow-md hover:bg-orange-700 transition duration-300 transform hover:scale-105">
             {loading ? 'Loading...' : <span className="flex items-center gap-2">
               <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
                 Create 
